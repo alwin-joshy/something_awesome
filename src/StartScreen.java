@@ -128,7 +128,7 @@ public class StartScreen {
         
     }
 
-    private boolean login() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ParseException {
+    private boolean login() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ParseException, InterruptedException {
         Common.clearTerminal();
         Scanner s = new Scanner(System.in);
         Console c =  System.console();
@@ -155,6 +155,8 @@ public class StartScreen {
                     if (enteredPassword.equals(actualPassword)) {
                         currUser = new User(username);
                         invalid = false;
+                        System.out.println("\nLogin successful!");
+                        Thread.sleep(1000);
                     }
                 } 
             }
