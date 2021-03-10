@@ -3,10 +3,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 import javax.crypto.SecretKeyFactory;
@@ -20,10 +23,12 @@ import org.json.simple.parser.ParseException;
 
 public class StartScreen {
     private User currUser;
+    private SqliteDB db;
 
     public User startup() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ParseException, InterruptedException {
         // Show initial options         
         Scanner s = new Scanner(System.in);
+        db = new SqliteDB();
 
         Boolean done = false; 
         while (!done) {
@@ -48,7 +53,8 @@ public class StartScreen {
                 System.out.println("Invalid command - please try again");
             }
         }
-    
+        
+        db.closeConnection();
         return currUser;
     } 
 
@@ -64,15 +70,8 @@ public class StartScreen {
         while (!done){
             System.out.print("Enter username: ");
             username = s.nextLine();
-            if (new File("accounts.json").isFile()) {
-                JSONParser p = new JSONParser();
-                FileReader r = new FileReader("accounts.json");
-                accountList = (JSONObject) p.parse(r);
-                if (accountList.containsKey(username)) {
-                    System.out.println("This username has already been taken. Please try another one.");
-                } else {
-                    done = true;
-                }
+            if (db.checkUsernameExists(username)) {
+                System.out.println("This username has already been taken. Please try another one.");
             } else {
                 done = true;
             }
@@ -104,21 +103,8 @@ public class StartScreen {
             }
         }
 
-        // Writes updated accounts list to JSON file
-        JSONObject data = new JSONObject();
-        data.put("salt", saltString);
-        data.put("password", hash1String);
-        JSONObject accounts;
-        accountList.put(username, data);
-        try {
-            FileWriter f = new FileWriter("accounts.json");
-            f.write(accountList.toJSONString());
-            f.flush();
-            f.close();
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        }
+        // Adds to database
+        db.addUser(username, hash1String, saltString);
 
         System.out.println("Account creation successful!");
         currUser = new User(username);
@@ -138,27 +124,28 @@ public class StartScreen {
             System.out.print("Enter username: ");
             String username = s.nextLine();
             System.out.print("Enter password: ");
+            char[] password = c.readPassword();
             // If there are no users yet, there is obviously no way they can sign in
-            if (new File("accounts.json").isFile()) {
-                JSONParser p = new JSONParser();
-                FileReader r = new FileReader("accounts.json");
-                JSONObject accounts = (JSONObject) p.parse(r);
-                // If the username isn't a key in the JSON file, the user cannot exist
-                if (accounts.containsKey(username)){
-                    JSONObject user = (JSONObject) accounts.get(username);
-                    String salt = (String) user.get("salt");
-                    String actualPassword = (String) user.get("password");
-                    byte[] saltArray = Base64.decodeBase64(salt);
+            if (db.checkUsernameExists(username)) {
+                ResultSet res = db.getSaltAndHash(username);
+                String salt = "";
+                String actualPass = "";
+                try {
+                    salt = res.getString("salt");
+                    actualPass = res.getString("password");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                byte[] saltArray = Base64.decodeBase64(salt);
+                String enteredPassword = hashPassword(saltArray, password);
+                // Compares the hash of the entered password with that of the actual password
+                if (enteredPassword.equals(actualPass)) {
+                    currUser = new User(username);
+                    invalid = false;
+                    System.out.println("\nLogin successful!");
+                    Thread.sleep(1000);
+                }
 
-                    String enteredPassword = hashPassword(saltArray, c.readPassword());
-                    // Compares the hash of the entered password with that of the actual password
-                    if (enteredPassword.equals(actualPassword)) {
-                        currUser = new User(username);
-                        invalid = false;
-                        System.out.println("\nLogin successful!");
-                        Thread.sleep(1000);
-                    }
-                } 
             }
             if (invalid) {
                 System.out.println("Invalid username/password combination. Press 1 to try again or any other key to return to the previous screen");

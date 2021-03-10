@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class MainScreen {
@@ -17,7 +18,7 @@ public class MainScreen {
         while (!command.equals("q")) {
             switch (command) {
                 case "?":
-
+                    printCommands();
                 case "a": 
                     //addAccount();
                 case "c":
@@ -52,8 +53,40 @@ public class MainScreen {
         String input = s.nextLine();
         if (input.equals("y")) {
             System.out.println(sGen.generateDefault());
+        } else if (input.equals("n")) {
+            int length;
+            boolean lc, uc, num, symb;
+            while (true) {
+                System.out.print("Enter desired length (5-128): ");
+                length = s.nextInt();
+                if (length >= 5 && length <= 128) {
+                    break;
+                } 
+                System.out.println("Desired length must be between 5 and 128 characters long");
+            } while (true) {
+                System.out.print("Enter binary string for lowercase, uppercase, numbers, and symbols e.g. 1000 for only lc letters");
+                String flags = s.nextLine();
+                ArrayList<Boolean> v = processFlags(flags);
+                if (v != null) {
+                    lc = v.get(0); uc = v.get(1); num = v.get(2); symb = v.get(3);
+                    break;
+                }
+                System.out.println("Please entre a valid binary string");
+            }
+            System.out.println(sGen.generateCustom(length, lc, uc, num, symb));
         }
     }
+
+   private ArrayList<Boolean> processFlags(String flags) {
+        if (flags.equals("0000")) return null;
+        if (flags.length() != 4) return null;
+        ArrayList<Boolean> values = new ArrayList<Boolean>();
+        for (int i = 0; i < 4; i++) {
+            if (flags.charAt(i) != '1' && flags.charAt(i) != '0') return null;
+            values.add(flags.charAt(i) == '1' ? true : false);
+        }
+        return values;
+   }
 
     public void printCommands() {
         System.out.println("a - add new account\n"+

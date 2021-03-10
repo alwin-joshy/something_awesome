@@ -6,24 +6,44 @@ import org.json.simple.parser.ParseException;
 
 public class PasswordManager {
     private User currUser;
-    private StartScreen sc;
+    private StartScreen ss;
+    private MainScreen ms;
 
     public PasswordManager() {
-        this.sc = new StartScreen();
+        this.ss = new StartScreen();
+        this.ms = new MainScreen();
+        this.currUser = null;
     }
 
     public static void main(String[] args) throws Exception {
         PasswordManager pm = new PasswordManager();
-        pm.startup();
-        pm.initializeUser();
+        while (true) {
+            pm.startup();
+            pm.initializeUser();
+            pm.beginMain();
+            pm.logout();
+        }
+
+    }
+
+    public User getCurUser() {
+        return currUser;
     }
 
     public void startup() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ParseException, InterruptedException {
-        currUser = sc.startup();
+        currUser = ss.startup();
     }
 
     public void initializeUser(){
         currUser.loadData();
+    }
+
+    public void beginMain() {
+        ms.begin(currUser);
+    }
+
+    public void logout() {
+        currUser = null;
     }
 
 }
