@@ -30,7 +30,7 @@ public class MainScreen {
                 case "g":
                     generateString();
                 case "s":
-                    //settingsScreen();
+                    settings();
             }
 
             System.out.print("Enter command: ");
@@ -45,6 +45,18 @@ public class MainScreen {
             System.exit(1);
         }
     }
+    
+    public void settings(){
+        System.out.println("Enter g to set the default configuration for the random password generator");
+        Scanner s = new Scanner(System.in);
+        String command = s.nextLine();
+        switch (command) {
+            case "g":
+                int length = getGeneratorLength();
+                Arraylist<Boolean> v = getGeneratorConfig();
+                sGen.setDefault(length, v.get(0), v.get(1), v.get(2), v.get(3));
+        }
+    }
 
     public void generateString() {
         System.out.println("Would you like to use the default configuration (" + sGen.getLength() + " characters, lc letters=" + sGen.getlc() +
@@ -54,28 +66,39 @@ public class MainScreen {
         if (input.equals("y")) {
             System.out.println(sGen.generateDefault());
         } else if (input.equals("n")) {
-            int length;
-            boolean lc, uc, num, symb;
-            while (true) {
-                System.out.print("Enter desired length (5-128): ");
-                length = s.nextInt();
-                if (length >= 5 && length <= 128) {
-                    break;
-                } 
-                System.out.println("Desired length must be between 5 and 128 characters long");
-            } while (true) {
-                System.out.print("Enter binary string for lowercase, uppercase, numbers, and symbols e.g. 1000 for only lc letters");
-                String flags = s.nextLine();
-                ArrayList<Boolean> v = processFlags(flags);
-                if (v != null) {
-                    lc = v.get(0); uc = v.get(1); num = v.get(2); symb = v.get(3);
-                    break;
-                }
-                System.out.println("Please entre a valid binary string");
-            }
-            System.out.println(sGen.generateCustom(length, lc, uc, num, symb));
+            int length = getGeneratorLength();
+            Arraylist<Boolean> v = getGeneratorConfig();
+            System.out.println(sGen.generateCustom(length, v.get(0), v.get(1), v.get(2), v.get(3)));
         }
     }
+   
+    
+    private int getGeneratorLength() {
+        int length;
+        while (true) {
+            System.out.print("Enter desired length (5-128): ");
+            length = s.nextInt();
+            if (length >= 5 && length <= 128) {
+                break;
+            }
+            System.out.println("Desired length must be between 5 and 128 characters long");
+        }
+        return length;
+   }
+    
+   private String getGeneratorConfig() {
+        while (true) {
+            System.out.print("Enter binary string for lowercase, uppercase, numbers, and symbols e.g. 1000 for only lc letters");
+            String flags = s.nextLine();
+            ArrayList<Boolean> v = processFlags(flags);
+            if (v != null) {
+                break;
+            }
+            System.out.println("Please entre a valid binary string");
+        }
+        return v;
+       
+   }
 
    private ArrayList<Boolean> processFlags(String flags) {
         if (flags.equals("0000")) return null;
