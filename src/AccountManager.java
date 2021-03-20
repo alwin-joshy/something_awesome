@@ -14,14 +14,14 @@ public class AccountManager {
         String service = s.nextLine().toLowerCase();
         System.out.print("Enter username: ");
         String username = s.nextLine();
-        if (SqliteDB.checkServiceUsernameExists(uid, service, username)) {
+        if (SqliteDB.checkServiceUsernameExists(service, username)) {
             System.out.println("This account already exists!");
             try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
             return;
         }
        
         String password = getPassword(sGen);
-        SqliteDB.addAccount(uid, service, username, password);
+        SqliteDB.addAccount(service, username, password);
 
         System.out.println("Success, added new " + service + " account with username " + username);
         try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
@@ -36,7 +36,7 @@ public class AccountManager {
         String service = s.nextLine().toLowerCase();
         System.out.println();
         System.out.println("Accounts registered for " + service + ":");
-        ResultSet r = SqliteDB.getAccountsFromService(uid, service);
+        ResultSet r = SqliteDB.getAccountsFromService(service);
         ArrayList<String> usernames = new ArrayList<String>();
         try {
             if (!r.next()) {
@@ -79,7 +79,7 @@ public class AccountManager {
         String option = s.nextLine();
         if (option.equals("1")) {
             String password = getPassword(sGen);
-            if (SqliteDB.updatePassword(uid, service, usernames.get(index), password) == 1){
+            if (SqliteDB.updatePassword(service, usernames.get(index), password) == 1){
                 System.out.println("Password changed successfully");
                 try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
             }
@@ -87,7 +87,7 @@ public class AccountManager {
             System.out.print("Are you sure you want to delete this account? Details will be lost permanently and cannot be recovered. Enter y to confirm and anything else to cancel: ");
             option = s.nextLine();
             if (option.equals("y")){
-                SqliteDB.deleteAccount(uid, service, usernames.get(index));
+                SqliteDB.deleteAccount(service, usernames.get(index));
                 System.out.println(usernames.get(index) + " successfully deleted");
                 try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
             } 
@@ -103,6 +103,7 @@ public class AccountManager {
         System.out.println("Select from the following options: ");
         System.out.println("1. Generate a random string");
         System.out.println("2. Enter an already selected password");
+        System.out.println("Enter selection: ");
         String password = ""; 
         while (true){
             int option = s.nextInt();
@@ -111,10 +112,10 @@ public class AccountManager {
             if (option == 1) {
                 while (!confirm) {
                     password = sGen.generateString();
-                    System.out.println("The generated password is: " + password);
-                    System.out.print("Enter y if this password is satisfactory and any other button to generate a different password: ");
+                    System.out.println("\nThe generated password is: " + password);
+                    System.out.print("Press enter if this password is satisfactory and any other key to generate a different password: ");
                     String check = s.nextLine().toLowerCase();
-                    if (check.equals("y")){
+                    if (check.equals("")){
                         confirm = true;
                     }
                 }

@@ -91,17 +91,17 @@ public class StringGenerator {
 
     public String generateString() {
         System.out.println("Would you like to use the default configuration (" + getLength() + " characters, lc letters=" + getlc() +
-                            ", uc letters=" + getuc() + ", numbers=" + getNum() + ", symbols=" + getSymb() + ")? y/n");
+                            ", uc letters=" + getuc() + ", numbers=" + getNum() + ", symbols=" + getSymb() + ")?");
+        System.out.print("Press enter for the default and any other key for custom: ");
         Scanner s = new Scanner(System.in);
         String input = s.nextLine();
-        if (input.equals("y")) {
+        if (input.equals("")) {
             return generateDefault();
-        } else if (input.equals("n")) {
+        } else {
             int length = getGeneratorLength();
             ArrayList<Boolean> v = getGeneratorConfig();
             return generateCustom(length, v.get(0), v.get(1), v.get(2), v.get(3));
         }
-        return null;
     }
 
     public void setDefaultInteractive() {

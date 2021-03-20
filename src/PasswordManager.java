@@ -34,10 +34,12 @@ public class PasswordManager {
     }
 
     public void beginMain() {
+        SqliteDB.setCurrUserID(currUser.getuid());
         ms.begin(currUser);
     }
 
     public void logout() {
+        SqliteDB.setCurrUserID(null);
         currUser = null;
     }
 

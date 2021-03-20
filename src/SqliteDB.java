@@ -1,17 +1,28 @@
-import java.io.IOException;
-import java.lang.Thread.State;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.MessageFormat;
 
 public class SqliteDB {
 
     private static Connection c = null;
     private static boolean hasData = false; 
+    private static String uid = null;
+
+    public static void setCurrUserID(String currUserID) {
+        uid = currUserID;
+    }
+
+    public static void eraseRecords() {
+        try {
+            Statement s = c.createStatement();
+            s.execute("DELETE FROM user" + uid + "_data");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static boolean checkUsernameExists(String username) {
         try {
@@ -26,7 +37,7 @@ public class SqliteDB {
         return false;
     }
 
-    public static int updatePassword(String uid, String service, String username, String password) {
+    public static int updatePassword(String service, String username, String password) {
         try {
             getConnection();
             String q = "UPDATE user" + uid + "_data SET password=? WHERE service=? AND username=?";
@@ -41,7 +52,7 @@ public class SqliteDB {
         return 0;
     }
 
-    public static void deleteAccount(String uid, String service, String username) {
+    public static void deleteAccount(String service, String username) {
         try {
             getConnection();
             String q = "DELETE from user" + uid + "_data WHERE service=? AND username=?";
@@ -54,7 +65,7 @@ public class SqliteDB {
         }
     }
 
-    public static ResultSet getAccountsFromService(String uid, String service) {
+    public static ResultSet getAccountsFromService(String service) {
         try {
             getConnection();
             String q = "SELECT * from user" + uid + "_data WHERE service=?";
@@ -67,7 +78,7 @@ public class SqliteDB {
         return null;
     }
 
-    public static boolean checkServiceUsernameExists(String uid, String service, String username) {
+    public static boolean checkServiceUsernameExists(String service, String username) {
         try {
             getConnection();
             String q = "SELECT * from user" + uid + "_data WHERE service=? and username=?";
@@ -96,7 +107,7 @@ public class SqliteDB {
         return null;
     }
 
-    public static void addAccount(String uid, String service, String username, String password) {
+    public static void addAccount(String service, String username, String password) {
         try {
             getConnection();
             String query = "INSERT INTO user" + uid + "_data values (?, ?, ?)";
