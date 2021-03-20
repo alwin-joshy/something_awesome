@@ -26,7 +26,10 @@ public class MainScreen {
                     Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
                 case "c":
-                    //changeAccount();
+                    AccountManager.modifyAccount(u.getuid(), sGen);
+                    Common.clearTerminal();
+                    Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
+                    break;
                 case "v":
                     //viewAccounts();
                 case "p":
@@ -39,7 +42,7 @@ public class MainScreen {
             }
             System.out.println();
             System.out.print("Enter command: ");
-            command = s.nextLine();
+             command = s.nextLine();
         }
 
         System.out.println("Enter x to quit and any other button to return to the login screen");

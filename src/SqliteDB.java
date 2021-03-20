@@ -26,6 +26,47 @@ public class SqliteDB {
         return false;
     }
 
+    public static int updatePassword(String uid, String service, String username, String password) {
+        try {
+            getConnection();
+            String q = "UPDATE user" + uid + "_data SET password=? WHERE service=? AND username=?";
+            PreparedStatement prep = c.prepareStatement(q);
+            prep.setString(1, password);
+            prep.setString(2, service);
+            prep.setString(3, username);
+            return prep.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public static void deleteAccount(String uid, String service, String username) {
+        try {
+            getConnection();
+            String q = "DELETE from user" + uid + "_data WHERE service=? AND username=?";
+            PreparedStatement prep = c.prepareStatement(q);
+            prep.setString(1, service);
+            prep.setString(2, username);
+            prep.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static ResultSet getAccountsFromService(String uid, String service) {
+        try {
+            getConnection();
+            String q = "SELECT * from user" + uid + "_data WHERE service=?";
+            PreparedStatement prep = c.prepareStatement(q);
+            prep.setString(1, service);
+            return prep.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static boolean checkServiceUsernameExists(String uid, String service, String username) {
         try {
             getConnection();
