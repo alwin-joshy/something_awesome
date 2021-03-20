@@ -19,7 +19,6 @@ public class PasswordManager {
         PasswordManager pm = new PasswordManager();
         while (true) {
             pm.startup();
-            pm.initializeUser();
             pm.beginMain();
             pm.logout();
         }
@@ -32,10 +31,6 @@ public class PasswordManager {
 
     public void startup() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ParseException, InterruptedException {
         currUser = ss.startup();
-    }
-
-    public void initializeUser(){
-        currUser.loadData();
     }
 
     public void beginMain() {

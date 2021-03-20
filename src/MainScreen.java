@@ -19,8 +19,12 @@ public class MainScreen {
             switch (command) {
                 case "?":
                     printCommands();
+                    break;
                 case "a": 
-                    //addAccount();
+                    AccountManager.addAccount(u.getuid(), sGen);
+                    Common.clearTerminal();
+                    Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
+                    break;
                 case "c":
                     //changeAccount();
                 case "v":
@@ -28,7 +32,8 @@ public class MainScreen {
                 case "p":
                     //fetchCredentials();
                 case "g":
-                    generateString();
+                    System.out.println(sGen.generateString());
+                    break;
                 case "s":
                     //settingsScreen();
             }
@@ -45,48 +50,7 @@ public class MainScreen {
             System.exit(1);
         }
     }
-
-    public void generateString() {
-        System.out.println("Would you like to use the default configuration (" + sGen.getLength() + " characters, lc letters=" + sGen.getlc() +
-                            ", uc letters=" + sGen.getuc() + ", numbers=" + sGen.getNum() + ", symbols=" + sGen.getSymb() + ")? y/n");
-        Scanner s = new Scanner(System.in);
-        String input = s.nextLine();
-        if (input.equals("y")) {
-            System.out.println(sGen.generateDefault());
-        } else if (input.equals("n")) {
-            int length;
-            boolean lc, uc, num, symb;
-            while (true) {
-                System.out.print("Enter desired length (5-128): ");
-                length = s.nextInt();
-                if (length >= 5 && length <= 128) {
-                    break;
-                } 
-                System.out.println("Desired length must be between 5 and 128 characters long");
-            } while (true) {
-                System.out.print("Enter binary string for lowercase, uppercase, numbers, and symbols e.g. 1000 for only lc letters");
-                String flags = s.nextLine();
-                ArrayList<Boolean> v = processFlags(flags);
-                if (v != null) {
-                    lc = v.get(0); uc = v.get(1); num = v.get(2); symb = v.get(3);
-                    break;
-                }
-                System.out.println("Please entre a valid binary string");
-            }
-            System.out.println(sGen.generateCustom(length, lc, uc, num, symb));
-        }
-    }
-
-   private ArrayList<Boolean> processFlags(String flags) {
-        if (flags.equals("0000")) return null;
-        if (flags.length() != 4) return null;
-        ArrayList<Boolean> values = new ArrayList<Boolean>();
-        for (int i = 0; i < 4; i++) {
-            if (flags.charAt(i) != '1' && flags.charAt(i) != '0') return null;
-            values.add(flags.charAt(i) == '1' ? true : false);
-        }
-        return values;
-   }
+    
 
     public void printCommands() {
         System.out.println("a - add new account\n"+

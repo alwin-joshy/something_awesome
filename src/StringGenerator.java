@@ -1,17 +1,18 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Scanner;
 
 public class StringGenerator {
-    private int length;
-    private boolean lc;
-    private boolean uc;
-    private boolean num;
-    private boolean symb;
-    private ArrayList<Character> defaultCharList;
+    private static int length;
+    private static boolean lc;
+    private static boolean uc;
+    private static boolean num;
+    private static boolean symb;
+    private static ArrayList<Character> defaultCharList;
 
     public StringGenerator(){
-        setDefault(14, true, true, true, false);
+        setDefault(16, true, true, true, false);
     }
 
     public String generateDefault(){
@@ -87,5 +88,48 @@ public class StringGenerator {
 
         return charList;
     }
+
+    public String generateString() {
+        System.out.println("Would you like to use the default configuration (" + getLength() + " characters, lc letters=" + getlc() +
+                            ", uc letters=" + getuc() + ", numbers=" + getNum() + ", symbols=" + getSymb() + ")? y/n");
+        Scanner s = new Scanner(System.in);
+        String input = s.nextLine();
+        if (input.equals("y")) {
+            return generateDefault();
+        } else if (input.equals("n")) {
+            int length;
+            boolean lc, uc, num, symb;
+            while (true) {
+                System.out.print("Enter desired length (5-128): ");
+                length = s.nextInt();
+                if (length >= 5 && length <= 128) {
+                    break;
+                } 
+                System.out.println("Desired length must be between 5 and 128 characters long");
+            } while (true) {
+                System.out.print("Enter binary string for lowercase, uppercase, numbers, and symbols e.g. 1000 for only lc letters");
+                String flags = s.nextLine();
+                ArrayList<Boolean> v = processFlags(flags);
+                if (v != null) {
+                    lc = v.get(0); uc = v.get(1); num = v.get(2); symb = v.get(3);
+                    break;
+                }
+                System.out.println("Please entre a valid binary string");
+            }
+            return generateCustom(length, lc, uc, num, symb);
+        }
+        return null;
+    }
+
+    private ArrayList<Boolean> processFlags(String flags) {
+        if (flags.equals("0000")) return null;
+        if (flags.length() != 4) return null;
+        ArrayList<Boolean> values = new ArrayList<Boolean>();
+        for (int i = 0; i < 4; i++) {
+            if (flags.charAt(i) != '1' && flags.charAt(i) != '0') return null;
+            values.add(flags.charAt(i) == '1' ? true : false);
+        }
+        return values;
+   }
 
 }

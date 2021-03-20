@@ -23,12 +23,10 @@ import org.json.simple.parser.ParseException;
 
 public class StartScreen {
     private User currUser;
-    private SqliteDB db;
 
     public User startup() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ParseException, InterruptedException {
         // Show initial options         
         Scanner s = new Scanner(System.in);
-        db = new SqliteDB();
 
         Boolean done = false; 
         while (!done) {
@@ -54,7 +52,7 @@ public class StartScreen {
             }
         }
         
-        db.closeConnection();
+        SqliteDB.closeConnection();
         return currUser;
     } 
 
@@ -70,7 +68,7 @@ public class StartScreen {
         while (!done){
             System.out.print("Enter username: ");
             username = s.nextLine();
-            if (db.checkUsernameExists(username)) {
+            if (SqliteDB.checkUsernameExists(username)) {
                 System.out.println("This username has already been taken. Please try another one.");
             } else {
                 done = true;
@@ -104,10 +102,10 @@ public class StartScreen {
         }
 
         // Adds to database
-        db.addUser(username, hash1String, saltString);
+        String uid = SqliteDB.addUser(username, hash1String, saltString);
 
         System.out.println("Account creation successful!");
-        currUser = new User(username);
+        currUser = new User(username, uid);
         Thread.sleep(1000);
 
         return true; 
@@ -126,13 +124,16 @@ public class StartScreen {
             System.out.print("Enter password: ");
             char[] password = c.readPassword();
             // If there are no users yet, there is obviously no way they can sign in
-            if (db.checkUsernameExists(username)) {
-                ResultSet res = db.getSaltAndHash(username);
+            if (SqliteDB.checkUsernameExists(username)) {
+                ResultSet res = SqliteDB.getSaltAndHash(username);
                 String salt = "";
                 String actualPass = "";
+                String uid = "";
                 try {
                     salt = res.getString("salt");
                     actualPass = res.getString("password");
+                    uid = res.getString("rowid");
+
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -140,7 +141,7 @@ public class StartScreen {
                 String enteredPassword = hashPassword(saltArray, password);
                 // Compares the hash of the entered password with that of the actual password
                 if (enteredPassword.equals(actualPass)) {
-                    currUser = new User(username);
+                    currUser = new User(username, uid);
                     invalid = false;
                     System.out.println("\nLogin successful!");
                     Thread.sleep(1000);
