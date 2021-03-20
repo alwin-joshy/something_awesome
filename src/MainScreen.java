@@ -35,7 +35,7 @@ public class MainScreen {
                     System.out.println(sGen.generateString());
                     break;
                 case "s":
-                    //settingsScreen();
+                    settings();
             }
 
             System.out.print("Enter command: ");
@@ -50,7 +50,6 @@ public class MainScreen {
             System.exit(1);
         }
     }
-    
 
     public void printCommands() {
         System.out.println("a - add new account\n"+
