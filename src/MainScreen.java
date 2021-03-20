@@ -37,7 +37,7 @@ public class MainScreen {
                 case "s":
                     settings();
             }
-
+            System.out.println();
             System.out.print("Enter command: ");
             command = s.nextLine();
         }
@@ -51,6 +51,18 @@ public class MainScreen {
         }
     }
 
+
+    public void settings(){
+        System.out.println("Enter g to set the default configuration for the random password generator");
+        Scanner s = new Scanner(System.in);
+        String command = s.nextLine();
+        switch (command) {
+            case "g":
+                sGen.setDefaultInteractive();
+                break;
+        }
+    }
+
     public void printCommands() {
         System.out.println("a - add new account\n"+
                            "c - change account details\n"+
@@ -58,6 +70,6 @@ public class MainScreen {
                            "p - search for account credentials\n"+
                            "g - generate random string\n"+
                            "s - settings\n"+
-                           "q - logout\n");
+                           "q - logout");
     }
 }
