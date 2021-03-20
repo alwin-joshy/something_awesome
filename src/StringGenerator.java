@@ -4,12 +4,12 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class StringGenerator {
-    private static int length;
-    private static boolean lc;
-    private static boolean uc;
-    private static boolean num;
-    private static boolean symb;
-    private static ArrayList<Character> defaultCharList;
+    private int length;
+    private boolean lc;
+    private boolean uc;
+    private boolean num;
+    private boolean symb;
+    private ArrayList<Character> defaultCharList;
 
     public StringGenerator(){
         setDefault(16, true, true, true, false);
