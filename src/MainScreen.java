@@ -13,6 +13,7 @@ public class MainScreen {
     public void begin(User u) {
         Common.clearTerminal();
         Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
+
         System.out.print("Enter command: ");
         Scanner s = new Scanner(System.in);
         String command = s.nextLine();
@@ -22,12 +23,12 @@ public class MainScreen {
                     printCommands();
                     break;
                 case "a": 
-                    AccountManager.addAccount(sGen);
-                    //Common.clearTerminal();
+                    AccountManager.addAccount();
+                    Common.clearTerminal();
                     Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
-                case "c":
-                    AccountManager.modifyAccount(sGen);
+                case "m":
+                    AccountManager.modifyAccount();
                     Common.clearTerminal();
                     Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
@@ -42,12 +43,19 @@ public class MainScreen {
                     Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
                 case "g":
-                    System.out.println(sGen.generateString());
+                    System.out.println(StringGenerator.generateString());
                     break;
                 case "s":
                     settings();
                     Common.clearTerminal();
                     Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
+                    break;
+                case "c":
+                    Common.clearTerminal();
+                    Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
+                    break;
+                default:
+                    System.out.println("Unknown command. Please enter a valid command (press ? to see full list)");
                     break;
             }
             System.out.print("Enter command: ");
@@ -64,7 +72,6 @@ public class MainScreen {
         }
     }
 
-
     public void settings(){
         System.out.println("Enter g to set the default configuration for the random password generator");
         System.out.println("Enter x to erase all records. This cannot be undone.");
@@ -74,7 +81,7 @@ public class MainScreen {
         String command = s.nextLine();
         switch (command) {
             case "g":
-                sGen.setDefaultInteractive();
+                StringGenerator.setDefaultInteractive();
                 break;
             case "x":
                 System.out.print("Are you sure you want to permenantly erase all records? Enter y to confirm and any other button to cancel: ");
@@ -97,11 +104,12 @@ public class MainScreen {
 
     public void printCommands() {
         System.out.println("a - add new account\n"+
-                           "c - change account details\n"+
+                           "m - modify account details/delete account\n"+
                            "l - view all accounts\n"+
                            "v - view the details for a specific account\n"+
                            "g - generate random string\n"+
                            "s - settings\n"+
+                           "c - clear the console\n"+
                            "q - logout");
     }
 }

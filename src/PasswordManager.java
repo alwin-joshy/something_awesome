@@ -35,6 +35,7 @@ public class PasswordManager {
 
     public void beginMain() {
         SqliteDB.setCurrUserID(currUser.getuid());
+        StringGenerator.loadDefault();
         ms.begin(currUser);
     }
 

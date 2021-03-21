@@ -1,5 +1,4 @@
 import java.io.Console;
-import java.security.MessageDigest;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -8,7 +7,7 @@ import java.util.Scanner;
 
 public class AccountManager {
  
-    public static void addAccount(StringGenerator sGen)  {
+    public static void addAccount()  {
         Common.clearTerminal();
         Common.fancyBanner("Add a new account");
         Scanner s = new Scanner(System.in);
@@ -22,7 +21,7 @@ public class AccountManager {
             return;
         }
        
-        String password = getPassword(sGen);
+        String password = getPassword();
         SqliteDB.addAccount(service, username, password);
 
         System.out.println("Success, added new " + service + " account with username " + username);
@@ -30,7 +29,7 @@ public class AccountManager {
         return;
     }
 
-    public static void modifyAccount(StringGenerator sGen) {
+    public static void modifyAccount() {
         Common.clearTerminal();
         Common.fancyBanner("Modify an existing account");
         ArrayList<String> selected = selectAccount();
@@ -44,7 +43,7 @@ public class AccountManager {
         Scanner s = new Scanner(System.in);
         String option = s.nextLine();
         if (option.equals("1")) {
-            String password = getPassword(sGen);
+            String password = getPassword();
             if (SqliteDB.updatePassword(selected.get(0), selected.get(1), password) == 1){
                 System.out.println("Password changed successfully");
                 try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
@@ -107,7 +106,7 @@ public class AccountManager {
     }
 
 
-    private static String getPassword(StringGenerator sGen) {
+    private static String getPassword() {
         Scanner s = new Scanner(System.in);
         System.out.println("Select from the following options: ");
         System.out.println("1. Generate a random string");
@@ -120,7 +119,7 @@ public class AccountManager {
             boolean confirm = false;
             if (option == 1) {
                 while (!confirm) {
-                    password = sGen.generateString();
+                    password = StringGenerator.generateString();
                     System.out.println("\nThe generated password is: " + password);
                     System.out.print("Press enter if this password is satisfactory and any other key to generate a different password: ");
                     String check = s.nextLine().toLowerCase();

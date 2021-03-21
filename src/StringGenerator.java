@@ -1,29 +1,42 @@
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
 public class StringGenerator {
-    private int length;
-    private boolean lc;
-    private boolean uc;
-    private boolean num;
-    private boolean symb;
-    private ArrayList<Character> defaultCharList;
+    private static int length;
+    private static boolean lc;
+    private static boolean uc;
+    private static boolean num;
+    private static boolean symb;
+    private static ArrayList<Character> defaultCharList;
 
-    public StringGenerator(){
-        setDefault(16, true, true, true, false);
-    }
-
-    public String generateDefault(){
+    public static String generateDefault(){
         return generate(length, defaultCharList);
     }
 
-    public String generateCustom(int length, boolean lc, boolean uc, boolean num, boolean symb) {
+    public static String generateCustom(int length, boolean lc, boolean uc, boolean num, boolean symb) {
         return generate(length, generateCharList(lc, uc, num, symb));
     }   
 
-    public String generate(int length, ArrayList<Character> chars) {
+    public static void loadDefault() {
+        ResultSet res = SqliteDB.getSgenConfig();
+        try {
+            res.next();
+            int length = res.getInt("length");
+            ArrayList<Boolean> v = processFlags(res.getString("flags"));
+            setDefault(length, v.get(0), v.get(1), v.get(2), v.get(3));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            SqliteDB.closeConnection();
+        }
+
+    }
+
+    public static String generate(int length, ArrayList<Character> chars) {
         Random r = new Random();
         int i = 0;
         String pass = new String();
@@ -34,37 +47,37 @@ public class StringGenerator {
         return pass;
     }
 
-    public int getLength(){
+    public static int getLength(){
         return length;
     }
 
-    public boolean getlc() {
+    public static boolean getlc() {
         return lc;
     }
 
-    public boolean getuc() {
+    public static boolean getuc() {
         return uc;
     }
 
-    public boolean getNum() {
+    public static boolean getNum() {
         return num;
     }
 
-    public boolean getSymb(){
+    public static boolean getSymb(){
         return symb;
     }
 
 
-    public void setDefault(int length, boolean lc, boolean uc, boolean num, boolean symb) {
-        this.length = length;
-        this.lc = lc;
-        this.uc = uc;
-        this.num = num;
-        this.symb = symb;
+    private static void setDefault(int lengthIn, boolean lcIn, boolean ucIn, boolean numIn, boolean symbIn) {
+        length = lengthIn;
+        lc = lcIn;
+        uc = ucIn;
+        num = numIn;
+        symb = symbIn;
         defaultCharList = generateCharList(lc, uc, num, symb);
     }
     
-    public ArrayList<Character> generateCharList(boolean lc, boolean uc, boolean num, boolean symb) {
+    public static ArrayList<Character> generateCharList(boolean lc, boolean uc, boolean num, boolean symb) {
         ArrayList<Character> charList = new ArrayList<Character>();
         if (lc) {
             for (char i = 'a'; i <= 'z'; i++) {
@@ -89,7 +102,7 @@ public class StringGenerator {
         return charList;
     }
 
-    public String generateString() {
+    public static String generateString() {
         System.out.println("Would you like to use the default configuration (" + getLength() + " characters, lc letters=" + getlc() +
                             ", uc letters=" + getuc() + ", numbers=" + getNum() + ", symbols=" + getSymb() + ")?");
         System.out.print("Press enter for the default and any other key for custom: ");
@@ -104,13 +117,22 @@ public class StringGenerator {
         }
     }
 
-    public void setDefaultInteractive() {
+    public static void setDefaultInteractive() {
         int length = getGeneratorLength();
         ArrayList<Boolean> v = getGeneratorConfig();
+        SqliteDB.setSgenDefault(length, createBinaryString(v));
         setDefault(length, v.get(0), v.get(1), v.get(2), v.get(3));
     }
 
-    private ArrayList<Boolean> processFlags(String flags) {
+    private static String createBinaryString(ArrayList<Boolean> v){
+        String res = "";
+        for (int i = 0; i < 4; i++) {
+            res = res + (v.get(i) == true ? 1 : 0);
+        }
+        return res;
+    }
+
+    private static ArrayList<Boolean> processFlags(String flags) {
         if (flags.equals("0000")) return null;
         if (flags.length() != 4) return null;
         ArrayList<Boolean> values = new ArrayList<Boolean>();
@@ -121,7 +143,7 @@ public class StringGenerator {
         return values;
    }
 
-    private int getGeneratorLength() {
+    private static int getGeneratorLength() {
         int length;
         Scanner s = new Scanner(System.in);
         while (true) {
@@ -135,7 +157,7 @@ public class StringGenerator {
         return length;
     }
 
-    private ArrayList<Boolean> getGeneratorConfig() {
+    private static ArrayList<Boolean> getGeneratorConfig() {
         ArrayList<Boolean> v;
         Scanner s = new Scanner(System.in);
         while (true) {
@@ -149,5 +171,7 @@ public class StringGenerator {
         }
         return v;
     }
+
+
 
 }

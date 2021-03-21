@@ -15,6 +15,33 @@ public class SqliteDB {
         uid = currUserID;
     }
 
+    public static ResultSet getSgenConfig() {
+        try {
+            getConnection();
+            Statement s = c.createStatement();
+            return s.executeQuery("SELECT length, flags FROM login where rowid="+uid);
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void setSgenDefault(int length, String flags){
+        try {
+            getConnection();
+            PreparedStatement prep = c.prepareStatement("UPDATE login SET length=?, flags=? WHERE rowid=?");
+            prep.setInt(1, length);
+            prep.setString(2, flags);
+            prep.setInt(3, Integer.parseInt(uid));
+            prep.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        
+    }
+
     public static void eraseRecords() {
         try {
             getConnection();
@@ -169,10 +196,12 @@ public class SqliteDB {
     public static String addUser(String username, String password, String salt) {
         try {   
             getConnection();
-            PreparedStatement prep = c.prepareStatement("INSERT into login(username, password, salt) values(?, ?, ?)");
+            PreparedStatement prep = c.prepareStatement("INSERT into login(username, password, salt, length, flags) values(?, ?, ?, ?, ?)");
             prep.setString(1, username);
             prep.setString(2, password);
             prep.setString(3, salt);
+            prep.setInt(4, 16);
+            prep.setString(5, "1110");
             prep.execute();
 
             prep = c.prepareStatement("SELECT rowid from login where username=?");
@@ -212,7 +241,7 @@ public class SqliteDB {
                 ResultSet res = state.executeQuery("SELECT name from sqlite_master WHERE type='table' and name='login'");
                 if (!res.next()) {
                     Statement state2 = c.createStatement();
-                    state2.execute("CREATE TABLE login(INTEGER PRIMARY KEY, username TEXT, password TEXT, salt TEXT)");
+                    state2.execute("CREATE TABLE login(INTEGER PRIMARY KEY, username TEXT, password TEXT, salt TEXT, length INT, flags TEXT)");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
