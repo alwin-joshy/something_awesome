@@ -22,19 +22,22 @@ public class MainScreen {
                     printCommands();
                     break;
                 case "a": 
-                    AccountManager.addAccount(u.getuid(), sGen);
+                    AccountManager.addAccount(sGen);
                     Common.clearTerminal();
                     Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
                 case "c":
-                    AccountManager.modifyAccount(u.getuid(), sGen);
+                    AccountManager.modifyAccount(sGen);
                     Common.clearTerminal();
                     Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
-                case "v":
+                case "l":
                     //viewAccounts();
-                case "p":
-                    //fetchCredentials();
+                case "v":
+                    AccountManager.viewAccount();
+                    Common.clearTerminal();
+                    Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
+                    break;
                 case "g":
                     System.out.println(sGen.generateString());
                     break;
@@ -92,8 +95,8 @@ public class MainScreen {
     public void printCommands() {
         System.out.println("a - add new account\n"+
                            "c - change account details\n"+
-                           "v - view all accounts\n"+
-                           "p - search for account credentials\n"+
+                           "l - view all accounts\n"+
+                           "v - view the details for a specific account\n"+
                            "g - generate random string\n"+
                            "s - settings\n"+
                            "q - logout");

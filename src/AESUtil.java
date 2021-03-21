@@ -34,24 +34,26 @@ public class AESUtil {
             IvParameterSpec ivSpec = new IvParameterSpec(iv);
             cipher.init(Cipher.ENCRYPT_MODE, sk, ivSpec);
             byte[] encrypted = cipher.doFinal(password.getBytes());
-            return Base64.encodeBase64String(iv) + Base64.encodeBase64String(encrypted);
+            byte[] combined = Arrays.copyOf(iv, iv.length + encrypted.length);
+            System.arraycopy(encrypted, 0, combined, iv.length, encrypted.length);
+            return Base64.encodeBase64String(combined);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private static String decrypt(String encrypted) {
+    public static String decrypt(String encrypted) {
         byte[] encryptedBytes = Base64.decodeBase64(encrypted);
-        byte[] iv = Arrays.copyOfRange(encryptedBytes, 0, 15);
-        byte[] encryption = Arrays.copyOfRange(encryptedBytes, 16, encryptedBytes.length - 1);
+        byte[] iv = Arrays.copyOfRange(encryptedBytes, 0, 16);
+        byte[] encryption = Arrays.copyOfRange(encryptedBytes, 16, encryptedBytes.length);
         try{
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             SecretKeySpec sk = new SecretKeySpec(keyString.getBytes(), "AES");
             IvParameterSpec ivSpec = new IvParameterSpec(iv);
-            cipher.init(Cipher.ENCRYPT_MODE, sk, ivSpec);
+            cipher.init(Cipher.DECRYPT_MODE, sk, ivSpec);
             byte[] original = cipher.doFinal(encryption);
-    
+            
             return new String(original);
         } catch (Exception e) {
             e.printStackTrace();

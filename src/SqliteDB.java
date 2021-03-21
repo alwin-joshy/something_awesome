@@ -78,6 +78,22 @@ public class SqliteDB {
         return null;
     }
 
+    public static String getAccountPassword(String service, String username) {
+        try {
+            getConnection();
+            String q = "SELECT password from user" + uid + "_data WHERE service=? AND username=?";
+            PreparedStatement prep = c.prepareStatement(q);
+            prep.setString(1, service);
+            prep.setString(2, username);
+            ResultSet res = prep.executeQuery();
+            res.next();
+            return res.getString("password");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static boolean checkServiceUsernameExists(String service, String username) {
         try {
             getConnection();

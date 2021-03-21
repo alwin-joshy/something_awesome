@@ -2,11 +2,12 @@ import java.io.Console;
 import java.security.MessageDigest;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class AccountManager {
  
-    public static void addAccount(String uid, StringGenerator sGen)  {
+    public static void addAccount(StringGenerator sGen)  {
         Common.clearTerminal();
         Common.fancyBanner("Add a new account");
         Scanner s = new Scanner(System.in);
@@ -28,58 +29,22 @@ public class AccountManager {
         return;
     }
 
-    public static void modifyAccount(String uid, StringGenerator sGen) {
+    public static void modifyAccount(StringGenerator sGen) {
         Common.clearTerminal();
         Common.fancyBanner("Modify an existing account");
-        Scanner s = new Scanner(System.in);
-        System.out.print("Enter service e.g. Google, Facebook, Openlearning: ");
-        String service = s.nextLine().toLowerCase();
-        System.out.println();
-        System.out.println("Accounts registered for " + service + ":");
-        ResultSet r = SqliteDB.getAccountsFromService(service);
-        ArrayList<String> usernames = new ArrayList<String>();
-        try {
-            if (!r.next()) {
-                System.out.println("You do not have any accounts associated with " + service);
-                Thread.sleep(2000);
-                return;
-            }
-            int i = 0;
-            do {
-                String username = r.getString("username");
-                System.out.println(i + ". " + username);
-                usernames.add(username);
-                i++;
-            } while (r.next());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        boolean check = false;
-        int index = 0;
-        while (!check) {
-            System.out.print("Enter the corresponding number of the account you would like to change or -1 to back to the main menu: ");
-            index = s.nextInt();
-            s.nextLine();
-            if (index == -1) {
-                return;
-            }
-            if (index <= usernames.size()) {
-                break;
-            }
-            System.out.println("Invalid selection! Please choose a number between 0 and " + (usernames.size() - 1) + "or enter -1 to go back to main menu");
-        }
-        System.out.println("You have selected " + usernames.get(index) +". What would you like to do?");
+        ArrayList<String> selected = selectAccount();
+        if (selected == null) return;
+        System.out.println("You have selected " + selected.get(1) +". What would you like to do?");
         System.out.println("1. Change the password");
         System.out.println("2. Delete this account");
         System.out.println("Other. Return to main menu");
         System.out.println();
         System.out.print("Enter option: ");
+        Scanner s = new Scanner(System.in);
         String option = s.nextLine();
         if (option.equals("1")) {
             String password = getPassword(sGen);
-            if (SqliteDB.updatePassword(service, usernames.get(index), password) == 1){
+            if (SqliteDB.updatePassword(selected.get(0), selected.get(1), password) == 1){
                 System.out.println("Password changed successfully");
                 try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
             }
@@ -87,14 +52,28 @@ public class AccountManager {
             System.out.print("Are you sure you want to delete this account? Details will be lost permanently and cannot be recovered. Enter y to confirm and anything else to cancel: ");
             option = s.nextLine();
             if (option.equals("y")){
-                SqliteDB.deleteAccount(service, usernames.get(index));
-                System.out.println(usernames.get(index) + " successfully deleted");
+                SqliteDB.deleteAccount(selected.get(0), selected.get(1));
+                System.out.println(selected.get(1) + " successfully deleted");
                 try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
             } 
         }
 
         return;
 
+    }
+
+    public static void viewAccount() {
+        Common.clearTerminal();
+        Common.fancyBanner("View account details");
+        ArrayList<String> selected = selectAccount();
+        if (selected == null) return;
+        String encryptedPass = SqliteDB.getAccountPassword(selected.get(0), selected.get(1));
+        System.out.println("Service: " + selected.get(0));
+        System.out.println("Username: " + selected.get(1));
+        System.out.println("Password: " + AESUtil.decrypt(encryptedPass));
+        System.out.print("\nEnter any character to return to the main menu: ");
+        Scanner s = new Scanner(System.in);
+        s.nextLine();
     }
 
 
@@ -124,9 +103,10 @@ public class AccountManager {
                 while (!confirm) {
                     Console c =  System.console();
                     System.out.print("Enter password: ");
-                    password = c.readPassword().toString();
+                    password = new String(c.readPassword());
                     System.out.print("Confirm password: ");
-                    if (c.readPassword().toString().equals(password)) {
+                    String password2 = new String(c.readPassword());
+                    if (password.equals(password2)) {
                         confirm = true;
                     }
                 }
@@ -136,6 +116,49 @@ public class AccountManager {
         }
 
         return AESUtil.encrypt(password);
+    }
+
+    private static ArrayList<String> selectAccount() {
+        Scanner s = new Scanner(System.in);
+        System.out.print("Enter service e.g. Google, Facebook, Openlearning: ");
+        String service = s.nextLine().toLowerCase();
+        System.out.println();
+        System.out.println("Accounts registered for " + service + ":");
+        ResultSet r = SqliteDB.getAccountsFromService(service);
+        ArrayList<String> usernames = new ArrayList<String>();
+        try {
+            if (!r.next()) {
+                System.out.println("You do not have any accounts associated with " + service);
+                Thread.sleep(2000);
+                return null;
+            }
+            int i = 0;
+            do {
+                String username = r.getString("username");
+                System.out.println(i + ". " + username);
+                usernames.add(username);
+                i++;
+            } while (r.next());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        int index = 0;
+        while (true) {
+            System.out.print("Enter the corresponding number of the account you would like to select or -1 to back to the main menu: ");
+            index = s.nextInt();
+            s.nextLine();
+            if (index == -1) {
+                return null;
+            }
+            if (index <= usernames.size()) {
+                break;
+            }
+            System.out.println("Invalid selection! Please choose a number between 0 and " + (usernames.size() - 1) + "or enter -1 to go back to main menu");
+        }
+        System.out.println();
+        return new ArrayList<String>(Arrays.asList(service, usernames.get(index)));
     }
 
     
