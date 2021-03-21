@@ -1,6 +1,7 @@
 import java.io.Console;
 import java.security.MessageDigest;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -76,6 +77,35 @@ public class AccountManager {
         s.nextLine();
     }
 
+    public static void listAll(){
+        Common.clearTerminal();
+        Common.fancyBanner("List of all registered accounts");
+        ResultSet res = SqliteDB.allAccountsForUser();
+        try {
+            res.next();
+            String prev_service = null;
+            String curr_service;
+            int i = 1;
+            do {
+                curr_service = res.getString("service");
+                if (!curr_service.equals(prev_service)){
+                    i = 1;
+                    System.out.println(curr_service);
+                    prev_service = curr_service;
+                }
+                System.out.println("    " + i + ". " + res.getString("username"));
+                i++;
+            } while (res.next());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            SqliteDB.closeConnection();
+        }
+        System.out.print("\nEnter any character to return to the main menu: ");
+        Scanner s = new Scanner(System.in);
+        s.nextLine();
+    }
+
 
     private static String getPassword(StringGenerator sGen) {
         Scanner s = new Scanner(System.in);
@@ -142,6 +172,8 @@ public class AccountManager {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            SqliteDB.closeConnection();
         }
 
         int index = 0;

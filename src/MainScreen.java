@@ -23,7 +23,7 @@ public class MainScreen {
                     break;
                 case "a": 
                     AccountManager.addAccount(sGen);
-                    Common.clearTerminal();
+                    //Common.clearTerminal();
                     Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
                 case "c":
@@ -32,7 +32,10 @@ public class MainScreen {
                     Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
                 case "l":
-                    //viewAccounts();
+                    AccountManager.listAll();
+                    Common.clearTerminal();
+                    Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
+                    break;
                 case "v":
                     AccountManager.viewAccount();
                     Common.clearTerminal();

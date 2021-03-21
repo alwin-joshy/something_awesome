@@ -52,7 +52,6 @@ public class StartScreen {
             }
         }
         
-        SqliteDB.closeConnection();
         return currUser;
     } 
 
@@ -136,6 +135,8 @@ public class StartScreen {
 
                 } catch (SQLException e) {
                     e.printStackTrace();
+                } finally {
+                    SqliteDB.closeConnection();
                 }
                 byte[] saltArray = Base64.decodeBase64(salt);
                 String enteredPassword = hashPassword(saltArray, password);

@@ -17,12 +17,29 @@ public class SqliteDB {
 
     public static void eraseRecords() {
         try {
+            getConnection();
             Statement s = c.createStatement();
             s.execute("DELETE FROM user" + uid + "_data");
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
     }
+
+    public static ResultSet allAccountsForUser() {
+        try {
+            getConnection();
+            String q = "SELECT service, username from user" + uid + "_data ORDER BY service ASC, username ASC; ";
+            Statement s = c.createStatement();
+            return s.executeQuery(q);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } 
+        return null;
+
+
+    } 
 
     public static boolean checkUsernameExists(String username) {
         try {
@@ -33,6 +50,8 @@ public class SqliteDB {
             return res.next();
         } catch (SQLException e){
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
         return false;
     }
@@ -48,6 +67,8 @@ public class SqliteDB {
             return prep.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
         return 0;
     }
@@ -62,6 +83,8 @@ public class SqliteDB {
             prep.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
     }
 
@@ -74,7 +97,7 @@ public class SqliteDB {
             return prep.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        } 
         return null;
     }
 
@@ -90,6 +113,8 @@ public class SqliteDB {
             return res.getString("password");
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
         return null;
     }
@@ -105,6 +130,8 @@ public class SqliteDB {
             return res.next();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
         return false; 
     }
@@ -118,7 +145,7 @@ public class SqliteDB {
             return res;
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        } 
 
         return null;
     }
@@ -134,6 +161,8 @@ public class SqliteDB {
             prep.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
     }
 
@@ -157,6 +186,8 @@ public class SqliteDB {
             return uid;
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
         return null;
     }
