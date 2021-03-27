@@ -86,7 +86,7 @@ public class MainScreen {
             case "x":
                 System.out.print("Are you sure you want to permenantly erase all records? Enter y to confirm and any other button to cancel: ");
                 String confirm = s.nextLine();
-                if (confirm.equals("y")) {
+                if (confirm.equalsIgnoreCase("y")) {
                     SqliteDB.eraseRecords();
                     System.out.println("All records erased.");
                     try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}

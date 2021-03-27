@@ -24,7 +24,7 @@ import org.json.simple.parser.ParseException;
 public class StartScreen {
     private User currUser;
 
-    public User startup() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ParseException, InterruptedException {
+    public User startup() throws IOException, ParseException, InterruptedException {
         // Show initial options         
         Scanner s = new Scanner(System.in);
 
@@ -55,7 +55,7 @@ public class StartScreen {
         return currUser;
     } 
 
-    private boolean createUser() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ParseException, InterruptedException {
+    private boolean createUser() throws IOException, ParseException, InterruptedException {
         Common.clearTerminal();
         Common.fancyBanner("Create a new account");
         Scanner s = new Scanner(System.in);
@@ -77,7 +77,7 @@ public class StartScreen {
         // https://stackoverflow.com/questions/8138411/masking-password-input-from-the-console-java
         // Generating the salt
         
-        byte[] salt = saltGen();
+        byte[] salt = HashUtil.saltGen();
         String saltString = Base64.encodeBase64String(salt);
         done = false; 
         Console c =  System.console();
@@ -87,10 +87,10 @@ public class StartScreen {
         while (!done) {
 
             System.out.print("Enter password: ");
-            hash1String = hashPassword(salt, c.readPassword());
+            hash1String = HashUtil.hashPassword(salt, c.readPassword());
 
             System.out.print("Confirm password: ");
-            String hash2String = hashPassword(salt, c.readPassword());
+            String hash2String = HashUtil.hashPassword(salt, c.readPassword());
 
             if (!hash1String.equals(hash2String)) {
                 System.out.println("Passwords don't match! Try again");
@@ -100,8 +100,22 @@ public class StartScreen {
             }
         }
 
+        System.out.print("Press enter to add Arduino verification to your account or any other button to not: ");
+        String response = s.nextLine();
+
+        String serial = "";
+        if (response.equals("")) {
+            String serialReturned = ArduinoUtil.addArduino();
+            if (serialReturned.equals("")) {
+                return false;
+            }
+            serial = serialReturned;
+        }
+
+        String serialHash = HashUtil.hashPassword(salt, serial.toCharArray());
+
         // Adds to database
-        String uid = SqliteDB.addUser(username, hash1String, saltString);
+        String uid = SqliteDB.addUser(username, hash1String, saltString, serialHash);
 
         System.out.println("Account creation successful!");
         currUser = new User(username, uid);
@@ -111,7 +125,7 @@ public class StartScreen {
         
     }
 
-    private boolean login() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ParseException, InterruptedException {
+    private boolean login() throws IOException, ParseException, InterruptedException {
         Common.clearTerminal();
         Scanner s = new Scanner(System.in);
         Console c =  System.console();
@@ -124,26 +138,32 @@ public class StartScreen {
             char[] password = c.readPassword();
             // If there are no users yet, there is obviously no way they can sign in
             if (SqliteDB.checkUsernameExists(username)) {
-                ResultSet res = SqliteDB.getSaltAndHash(username);
+                ResultSet res = SqliteDB.getUserDetails(username);
                 String salt = "";
                 String actualPass = "";
                 String uid = "";
+                String serial = "";
                 try {
                     salt = res.getString("salt");
                     actualPass = res.getString("password");
                     uid = res.getString("rowid");
-
+                    serial = res.getString("serial");
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } finally {
                     SqliteDB.closeConnection();
                 }
                 byte[] saltArray = Base64.decodeBase64(salt);
-                String enteredPassword = hashPassword(saltArray, password);
+                String enteredPassword = HashUtil.hashPassword(saltArray, password);
                 // Compares the hash of the entered password with that of the actual password
                 if (enteredPassword.equals(actualPass)) {
                     currUser = new User(username, uid);
                     invalid = false;
+                    if (!serial.equals("")) {
+                        if (! ArduinoUtil.checkArduinoConnection(serial, saltArray)) {
+                            return false;
+                        }
+                    }
                     System.out.println("\nLogin successful!");
                     Thread.sleep(1000);
                 }
@@ -159,21 +179,5 @@ public class StartScreen {
         }
 
         return !invalid; 
-    }
-
-    // Generates a random salt
-    private byte[] saltGen() {
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[16];
-        random.nextBytes(salt);
-        return salt;
-    }
-
-    // Hashes a password and returns the hex string
-    private String hashPassword(byte[] salt, char[] pass) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        KeySpec passSpec = new PBEKeySpec(pass, salt, 65536, 128);
-        byte[] hash1 = factory.generateSecret(passSpec).getEncoded();
-        return Hex.encodeHexString(hash1);
     }
 }

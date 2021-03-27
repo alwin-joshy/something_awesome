@@ -163,10 +163,10 @@ public class SqliteDB {
         return false; 
     }
 
-    public static ResultSet getSaltAndHash(String username) {
+    public static ResultSet getUserDetails(String username) {
         try {
             getConnection();
-            PreparedStatement prep = c.prepareStatement("SELECT salt, password, rowid from login where username=?");
+            PreparedStatement prep = c.prepareStatement("SELECT salt, password, rowid, serial from login where username=?");
             prep.setString(1, username);
             ResultSet res = prep.executeQuery();
             return res;
@@ -193,15 +193,16 @@ public class SqliteDB {
         }
     }
 
-    public static String addUser(String username, String password, String salt) {
+    public static String addUser(String username, String password, String salt, String serial) {
         try {   
             getConnection();
-            PreparedStatement prep = c.prepareStatement("INSERT into login(username, password, salt, length, flags) values(?, ?, ?, ?, ?)");
+            PreparedStatement prep = c.prepareStatement("INSERT into login(username, password, salt, length, flags, serial) values(?, ?, ?, ?, ?, ?)");
             prep.setString(1, username);
             prep.setString(2, password);
             prep.setString(3, salt);
             prep.setInt(4, 16);
             prep.setString(5, "1110");
+            prep.setString(6, serial);
             prep.execute();
 
             prep = c.prepareStatement("SELECT rowid from login where username=?");
@@ -241,7 +242,7 @@ public class SqliteDB {
                 ResultSet res = state.executeQuery("SELECT name from sqlite_master WHERE type='table' and name='login'");
                 if (!res.next()) {
                     Statement state2 = c.createStatement();
-                    state2.execute("CREATE TABLE login(INTEGER PRIMARY KEY, username TEXT, password TEXT, salt TEXT, length INT, flags TEXT)");
+                    state2.execute("CREATE TABLE login(INTEGER PRIMARY KEY, username TEXT, password TEXT, salt TEXT, length INT, flags TEXT, serial TEXT)");
                 }
             } catch (Exception e) {
                 e.printStackTrace();

@@ -51,7 +51,7 @@ public class AccountManager {
         } else if (option.equals("2")) {
             System.out.print("Are you sure you want to delete this account? Details will be lost permanently and cannot be recovered. Enter y to confirm and anything else to cancel: ");
             option = s.nextLine();
-            if (option.equals("y")){
+            if (option.equalsIgnoreCase("y")){
                 SqliteDB.deleteAccount(selected.get(0), selected.get(1));
                 System.out.println(selected.get(1) + " successfully deleted");
                 try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
