@@ -75,6 +75,7 @@ public class ArduinoUtil {
         
         if (port.openPort()) {
             System.out.println("Successfully opened the port");
+            try {Thread.sleep(20000); } catch (InterruptedException e) {e.printStackTrace();}
         } else {
             System.out.println("Unable to open the port. Returning to main screen");
             try {Thread.sleep(2000); } catch (InterruptedException e) {e.printStackTrace();}
@@ -93,6 +94,7 @@ public class ArduinoUtil {
         }
 
         data.close();
+        port.closePort();
         return false;
     }
 
