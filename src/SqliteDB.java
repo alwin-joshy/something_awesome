@@ -166,7 +166,7 @@ public class SqliteDB {
     public static ResultSet getUserDetails(String username) {
         try {
             getConnection();
-            PreparedStatement prep = c.prepareStatement("SELECT salt, password, rowid, serial from login where username=?");
+            PreparedStatement prep = c.prepareStatement("SELECT salt, password, rowid, serial, f1 from login where username=?");
             prep.setString(1, username);
             ResultSet res = prep.executeQuery();
             return res;
@@ -219,6 +219,23 @@ public class SqliteDB {
         } finally {
             closeConnection();
         }
+    }
+
+    public static boolean checkPrints(String username, int fID) {
+        try {
+            getConnection();
+            PreparedStatement prep = c.prepareStatement("SELECT * from login where username=? AND ? in (f1, f2, f3, f4, f5)");
+            prep.setString(1, username);
+            prep.setInt(2, fID);
+            ResultSet res = prep.executeQuery();
+            return res.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return false;
+        
     }
 
     public static String addUser(String username, String password, String salt, String serial, int fID) {

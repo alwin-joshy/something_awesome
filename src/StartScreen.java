@@ -157,12 +157,14 @@ public class StartScreen {
                 String salt = "";
                 String actualPass = "";
                 String uid = "";
-                String serial = "";
+                String serial = ""; 
+                int fingerID = 0;
                 try {
                     salt = res.getString("salt");
                     actualPass = res.getString("password");
                     uid = res.getString("rowid");
                     serial = res.getString("serial");
+                    fingerID = res.getInt("f1");
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } finally {
@@ -174,11 +176,24 @@ public class StartScreen {
                 if (enteredPassword.equals(actualPass)) {
                     currUser = new User(username, uid);
                     invalid = false;
-                    if (!serial.equals("")) {
+
+                    if (fingerID != 0) {
+                        fingerID = ArduinoUtil.getFingerprint(username, serial, saltArray);
+                        if (fingerID == 0) {
+                            Thread.sleep(2000);
+                            return false;
+                        }
+                        if (!SqliteDB.checkPrints(username, fingerID)) {
+                            System.out.println("Fingerprint does not match any registered fingerprints. Returning to main menu");
+                            Thread.sleep(2000);
+                            return false;
+                        }
+                    } else if (!serial.equals("")) {
                         if (ArduinoUtil.checkArduinoConnection(serial, saltArray) == null) {
                             return false;
                         }
                     }
+
                     System.out.println("\nLogin successful!");
                     Thread.sleep(1000);
                 }

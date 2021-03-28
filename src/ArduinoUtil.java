@@ -44,178 +44,268 @@ public class ArduinoUtil {
         
     }
 
-    public static int addFingerprint(String authenticSerial, byte[] salt) throws IOException {
+    public static int getFingerprint(String username, String authenticSerial, byte[] salt) {
         SerialPort p = checkArduinoConnection(authenticSerial, salt);
         if (p == null) {
             return 0;
         }
-        System.out.println("here1");
         if (! p.openPort()) {
             System.out.println("Unable to open the port. Returning to main screen");
             try {Thread.sleep(2000); } catch (InterruptedException e) {e.printStackTrace();}
             return 0;
         }
-        System.out.println("here2");
+        uploadSketch(p, "fingerprint/");
+        p.setComPortTimeouts(SerialPort.TIMEOUT_SCANNER, 0, 0);
+        Scanner dataIn = new Scanner(p.getInputStream());
+
+        try {
+
+            System.out.println("Place registered finger on sensor");
+        
+            while (dataIn.hasNext()) {
+                String s = dataIn.next();
+                Boolean check = false;
+                switch (s) {
+                    case "taken":
+                        check = true;
+                        break;
+                    case "communication":
+                        System.out.println("Communication error");
+                        break;
+                    case "imaging":
+                        System.out.println("Imaging error");
+                        break;
+                    case "unknown":
+                        System.out.println("Imaging error");
+                        break;
+                }
+                if (check) break;
+            }
+
+            String s = dataIn.next();
+            switch (s) {
+                case "converted":
+                    break;
+                case "messy":
+                    System.out.println("Image too messy");
+                    return 0;
+                case "communication":
+                    System.out.println("Communication error");
+                    return 0;
+                case "features":
+                    System.out.println("Could not find fingerprint features");
+                    return 0;
+                case "unknown":
+                    System.out.println("Unknown error");
+                    return 0;
+            }
+
+            s = dataIn.next();
+            switch (s) {
+                case "match":
+                    break;
+                case "noMatch":
+                    System.out.println("Could not find a matching fingerprint");
+                    return 0;
+                case "communication":
+                    System.out.println("Communication error");
+                    return 0;
+                case "unknown":
+                    System.out.println("Unknown error");
+                    return 0;
+            }
+
+            s = dataIn.next();
+            System.out.println(s);
+
+            return Integer.parseInt(s); 
+
+        } finally {
+            dataIn.close();
+            p.closePort();
+        }
+
+        
+
+    } 
+
+    public static int addFingerprint(String authenticSerial, byte[] salt) throws IOException {
+        SerialPort p = checkArduinoConnection(authenticSerial, salt);
+        if (p == null) {
+            return 0;
+        }
+        if (! p.openPort()) {
+            System.out.println("Unable to open the port. Returning to main screen");
+            try {Thread.sleep(2000); } catch (InterruptedException e) {e.printStackTrace();}
+            return 0;
+        }
         uploadSketch(p, "enroll/");
-        System.out.println("here3");
         int fID = SqliteDB.getCurrentFingerprint();
 
         p.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
         
         Scanner dataIn = new Scanner(p.getInputStream());
-        OutputStream dataOut = p.getOutputStream();
 
-        dataOut.write((byte) fID);
-        dataOut.flush();
 
-        System.out.println("Please hold a finger on the sensor. You can add more fingers later");
+        try {
+            OutputStream dataOut = p.getOutputStream();
 
-        while (dataIn.hasNext()){
+            dataOut.write((byte) fID);
+            dataOut.flush();
+
+            System.out.println("Please hold a finger on the sensor. You can add more fingers later");
+
+            while (dataIn.hasNext()){
+                String s = dataIn.next();
+                boolean check = false;
+                switch (s) {
+                    case "taken":
+                        check = true;
+                        break;
+                    case "communication":
+                        System.out.println("Communication error");
+                        break;
+                    case "imaging":
+                        System.out.println("Imaging error");
+                        break;
+                    case "unknown":
+                        System.out.println("Unknown error");
+                        break;
+                }
+                if (check) break;   
+            }
+
+            
             String s = dataIn.next();
-            boolean check = false;
             switch (s) {
-                case "taken":
-                    check = true;
+                case "converted":
+                    break;
+                case "messy":
+                    System.out.println("Image too messy");
+                    return 0;
+                case "communication":
+                    System.out.println("Communication error");
+                    return 0;
+                case "features":
+                    System.out.println("Could not find fingerprint features");
+                    return 0;
+                case "unknown":
+                    System.out.println("Unknown error");
+                    return 0;
+            }
+            
+
+            System.out.println("Remove finger");
+            try {Thread.sleep(2000); } catch (InterruptedException e) {e.printStackTrace();}
+
+            while (dataIn.hasNext()){
+                s = dataIn.next();
+                boolean check = false;
+                switch (s) {
+                    case "noFinger":
+                        check = true;
+                        break;
+                    case "finger":
+                        break;
+                }
+                if (check) break;   
+            }
+
+            System.out.println("Place same finger again");
+
+            while (dataIn.hasNext()){
+                s = dataIn.next();
+                boolean check = false;
+                switch (s) {
+                    case "taken":
+                        check = true;
+                        break;
+                    case "communication":
+                        System.out.println("Communication error");
+                        break;
+                    case "imaging":
+                        System.out.println("Imaging error");
+                        break;
+                    case "unknown":
+                        System.out.println("Unknown error");
+                        break;
+                }
+                if (check) break;   
+            }
+
+            
+            s = dataIn.next();
+            switch (s) {
+                case "converted":
+                    break;
+                case "messy":
+                    System.out.println("Image too messy");
+                    return 0;
+                case "communication":
+                    System.out.println("Communication error");
+                    return 0;
+                case "features":
+                    System.out.println("Could not find fingerprint features");
+                    return 0;
+                case "unknown":
+                    System.out.println("Unknown error");
+                    return 0;
+            }
+
+            s = dataIn.next();
+            switch (s) {
+                case "matched":
+                    System.out.println("Prints matched!");
                     break;
                 case "communication":
                     System.out.println("Communication error");
-                    break;
-                case "imaging":
-                    System.out.println("Imaging error");
-                    break;
+                    return 0;
+                case "nomatch":
+                    System.out.println("Fingerprints did not match");
+                    return 0;
                 case "unknown":
                     System.out.println("Unknown error");
-                    break;
+                    return 0;
             }
-            if (check) break;   
-        }
 
-        
-        String s = dataIn.next();
-        switch (s) {
-            case "converted":
-                break;
-            case "messy":
-                System.out.println("Image too messy");
-                return 0;
-            case "communication":
-                System.out.println("Communication error");
-                return 0;
-            case "features":
-                System.out.println("Could not find fingerprint features");
-                return 0;
-            case "unknown":
-                System.out.println("Imaging error");
-                return 0;
-        }
-        
 
-        System.out.println("Remove finger");
-        try {Thread.sleep(2000); } catch (InterruptedException e) {e.printStackTrace();}
-
-        while (dataIn.hasNext()){
             s = dataIn.next();
-            boolean check = false;
             switch (s) {
-                case "noFinger":
-                    check = true;
-                    break;
-                case "finger":
-                    break;
-            }
-            if (check) break;   
-        }
-
-        System.out.println("Place same finger again");
-
-        while (dataIn.hasNext()){
-            s = dataIn.next();
-            boolean check = false;
-            switch (s) {
-                case "taken":
-                    check = true;
+                case "stored":
+                    System.out.println("Success!");
                     break;
                 case "communication":
                     System.out.println("Communication error");
-                    break;
-                case "imaging":
-                    System.out.println("Imaging error");
-                    break;
+                    return 0;
+                case "location":
+                    System.out.println("Could not store in that location");
+                    return 0;
+                case "flash":
+                    System.out.println("Error writing to flash");
+                    return 0;
                 case "unknown":
                     System.out.println("Unknown error");
-                    break;
+                    return 0;
             }
-            if (check) break;   
-        }
 
+            SqliteDB.updateCurrentFingerPrint();
+            return fID;
+        } finally {
+            dataIn.close();
+            p.closePort();
+        }
         
-        s = dataIn.next();
-        switch (s) {
-            case "converted":
-                break;
-            case "messy":
-                System.out.println("Image too messy");
-                return 0;
-            case "communication":
-                System.out.println("Communication error");
-                return 0;
-            case "features":
-                System.out.println("Could not find fingerprint features");
-                return 0;
-            case "unknown":
-                System.out.println("Unknown error");
-                return 0;
-        }
-
-        s = dataIn.next();
-        switch (s) {
-            case "matched":
-                System.out.println("Prints matched!");
-                break;
-            case "communication":
-                System.out.println("Communication error");
-                return 0;
-            case "nomatch":
-                System.out.println("Fingerprints did not match");
-                return 0;
-            case "unknown":
-                System.out.println("Unknown error");
-                return 0;
-        }
-
-
-        s = dataIn.next();
-        switch (s) {
-            case "stored":
-                System.out.println("Success!");
-                break;
-            case "communication":
-                System.out.println("Communication error");
-                return 0;
-            case "location":
-                System.out.println("Could not store in that location");
-                return 0;
-            case "flash":
-                System.out.println("Error writing to flash");
-                return 0;
-            case "unknown":
-                System.out.println("Unknown error");
-                return 0;
-        }
-
-        dataIn.close();
-        p.closePort();
-        SqliteDB.updateCurrentFingerPrint();
-        return fID;
     }
 
     private static void uploadSketch(SerialPort port, String sketchDir) {
         try {
-            System.out.println("bash uploadSketch.sh " + sketchDir + " " + port.getSystemPortName());
+            //System.out.println("bash uploadSketch.sh " + sketchDir + " " + port.getSystemPortName());
             Process p = Runtime.getRuntime().exec("bash uploadSketch.sh " + sketchDir + " " + port.getSystemPortName());
+            // This is really only necessary for debugging - wtf???? it doesnt work without this????????? 
+            // HUH??!?!? Apparently output must be consumed for it to work properly.
             BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(p.getInputStream()));
             while (reader.readLine() != null) {
-                System.out.println(reader.readLine());
+                //System.out.println(reader.readLine());
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -110,7 +110,7 @@ uint8_t getFingerprintEnroll() {
       Serial.println("imaging");
       break;
     default:
-      Serial.println("Unknown error");
+      Serial.println("unknown");
       break;
     }
   }
@@ -133,7 +133,7 @@ uint8_t getFingerprintEnroll() {
       Serial.println("features");
       return p;
     case FINGERPRINT_INVALIDIMAGE:
-      Serial.println("Could not find fingerprint features");
+      Serial.println("features");
       return p;
     default:
       Serial.println("Unknown");
@@ -230,10 +230,10 @@ uint8_t getFingerprintEnroll() {
     Serial.println("location");
     return p;
   } else if (p == FINGERPRINT_FLASHERR) {
-    Serial.println("Error writing to flash");
+    Serial.println("flash");
     return p;
   } else {
-    Serial.println("Unknown error");
+    Serial.println("unknown");
     return p;
   }
 
