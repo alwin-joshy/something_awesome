@@ -14,6 +14,7 @@ import java.util.Scanner;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.print.attribute.standard.Fidelity;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -100,7 +101,8 @@ public class StartScreen {
             }
         }
 
-        System.out.print("Press enter to add Arduino verification to your account or any other button to not: ");
+        System.out.println("Would you like to link an Arduino to your account? If you do this, your account can only be unlocked when this device is connected.");
+        System.out.print("Press enter for yes or any other button for no: ");
         String response = s.nextLine();
 
         String serial = "";
@@ -114,8 +116,21 @@ public class StartScreen {
 
         String serialHash = HashUtil.hashPassword(salt, serial.toCharArray());
 
+        int fID = 0;
+        if (!serial.equals("")) {
+            System.out.print("Press enter to add fingerprint verification or any other button to not: ");
+            response = s.nextLine();
+            if (response.equals("")) {
+                fID = ArduinoUtil.addFingerprint(serialHash, salt);
+                if (fID == 0) {
+                    Thread.sleep(2000);
+                    return false;
+                }
+            }
+        }        
+
         // Adds to database
-        String uid = SqliteDB.addUser(username, hash1String, saltString, serialHash);
+        String uid = SqliteDB.addUser(username, hash1String, saltString, serialHash, fID);
 
         System.out.println("Account creation successful!");
         currUser = new User(username, uid);
@@ -160,7 +175,7 @@ public class StartScreen {
                     currUser = new User(username, uid);
                     invalid = false;
                     if (!serial.equals("")) {
-                        if (! ArduinoUtil.checkArduinoConnection(serial, saltArray)) {
+                        if (ArduinoUtil.checkArduinoConnection(serial, saltArray) == null) {
                             return false;
                         }
                     }

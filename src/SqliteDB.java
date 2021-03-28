@@ -193,16 +193,45 @@ public class SqliteDB {
         }
     }
 
-    public static String addUser(String username, String password, String salt, String serial) {
+    public static int getCurrentFingerprint() {
+        try {
+            getConnection();
+            Statement s = c.createStatement();
+            ResultSet res = s.executeQuery("SELECT value FROM misc where key='fingerprintCounter'");
+            res.next();
+            return res.getInt("value");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+
+        return 0;
+    }
+
+    public static void updateCurrentFingerPrint() {
+        try {
+            getConnection();
+            Statement s2 = c.createStatement();
+            s2.executeUpdate("UPDATE misc SET value = value + 1 where key='fingerprintCounter'");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+    }
+
+    public static String addUser(String username, String password, String salt, String serial, int fID) {
         try {   
             getConnection();
-            PreparedStatement prep = c.prepareStatement("INSERT into login(username, password, salt, length, flags, serial) values(?, ?, ?, ?, ?, ?)");
+            PreparedStatement prep = c.prepareStatement("INSERT into login(username, password, salt, length, flags, serial, f1) values(?, ?, ?, ?, ?, ?, ?)");
             prep.setString(1, username);
             prep.setString(2, password);
             prep.setString(3, salt);
             prep.setInt(4, 16);
             prep.setString(5, "1110");
             prep.setString(6, serial);
+            prep.setInt(7, fID);
             prep.execute();
 
             prep = c.prepareStatement("SELECT rowid from login where username=?");
@@ -242,7 +271,11 @@ public class SqliteDB {
                 ResultSet res = state.executeQuery("SELECT name from sqlite_master WHERE type='table' and name='login'");
                 if (!res.next()) {
                     Statement state2 = c.createStatement();
-                    state2.execute("CREATE TABLE login(INTEGER PRIMARY KEY, username TEXT, password TEXT, salt TEXT, length INT, flags TEXT, serial TEXT)");
+                    state2.execute("CREATE TABLE login(INTEGER PRIMARY KEY, username TEXT, password TEXT, salt TEXT, length INT, flags TEXT, serial TEXT, f1 INT, f2 INT, f3 INT, f4 INT, f5 INT)");
+                    Statement state3 = c.createStatement();
+                    state3.execute("CREATE TABLE misc(key TEXT, value INT)");
+                    Statement state4 = c.createStatement();
+                    state4.execute("INSERT INTO misc(key, value) values('fingerprintCounter', 1)");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
