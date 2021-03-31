@@ -13,14 +13,17 @@ public class StringGenerator {
     private static boolean symb;
     private static ArrayList<Character> defaultCharList;
 
+    // Default generator
     public static String generateDefault(){
         return generate(length, defaultCharList);
     }
 
+    // Custom generator 
     public static String generateCustom(int length, boolean lc, boolean uc, boolean num, boolean symb) {
         return generate(length, generateCharList(lc, uc, num, symb));
     }   
 
+    // Loads default values into the generator 
     public static void loadDefault() {
         ResultSet res = SqliteDB.getSgenConfig();
         try {
@@ -36,6 +39,7 @@ public class StringGenerator {
 
     }
 
+    // Generates random string 
     public static String generate(int length, ArrayList<Character> chars) {
         Random r = new Random();
         int i = 0;
@@ -77,6 +81,7 @@ public class StringGenerator {
         defaultCharList = generateCharList(lc, uc, num, symb);
     }
     
+    // Generates character list which meets the flasg provided 
     public static ArrayList<Character> generateCharList(boolean lc, boolean uc, boolean num, boolean symb) {
         ArrayList<Character> charList = new ArrayList<Character>();
         if (lc) {
@@ -102,6 +107,7 @@ public class StringGenerator {
         return charList;
     }
 
+    // Interactive menu to generate a string 
     public static String generateString() {
         System.out.println("Would you like to use the default configuration (" + getLength() + " characters, lc letters=" + getlc() +
                             ", uc letters=" + getuc() + ", numbers=" + getNum() + ", symbols=" + getSymb() + ")?");
@@ -117,6 +123,7 @@ public class StringGenerator {
         }
     }
 
+    // Interactive menu to set the default
     public static void setDefaultInteractive() {
         int length = getGeneratorLength();
         ArrayList<Boolean> v = getGeneratorConfig();
@@ -124,6 +131,7 @@ public class StringGenerator {
         setDefault(length, v.get(0), v.get(1), v.get(2), v.get(3));
     }
 
+    // Creates binary string from flags 
     private static String createBinaryString(ArrayList<Boolean> v){
         String res = "";
         for (int i = 0; i < 4; i++) {
@@ -132,6 +140,7 @@ public class StringGenerator {
         return res;
     }
 
+    // Processes binary string to create boolean array for options 
     private static ArrayList<Boolean> processFlags(String flags) {
         if (flags.equals("0000")) return null;
         if (flags.length() != 4) return null;

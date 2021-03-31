@@ -11,10 +11,12 @@ public class SqliteDB {
     private static boolean hasData = false; 
     private static String uid = null;
 
+    // Sets the userID for queries
     public static void setCurrUserID(String currUserID) {
         uid = currUserID;
     }
 
+    // Gets configuration of random string generator for user 
     public static ResultSet getSgenConfig() {
         try {
             getConnection();
@@ -26,6 +28,7 @@ public class SqliteDB {
         return null;
     }
 
+    // Sets the default values for the string generator in the DB 
     public static void setSgenDefault(int length, String flags){
         try {
             getConnection();
@@ -42,6 +45,7 @@ public class SqliteDB {
         
     }
 
+    // Erases all the accounts stored for a user
     public static void eraseRecords() {
         try {
             getConnection();
@@ -54,6 +58,7 @@ public class SqliteDB {
         }
     }
 
+    // Returns an ordered list of all the accounts that the user has 
     public static ResultSet allAccountsForUser() {
         try {
             getConnection();
@@ -68,6 +73,7 @@ public class SqliteDB {
 
     } 
 
+    // Checks if the username already exists in the PM 
     public static boolean checkUsernameExists(String username) {
         try {
             getConnection();
@@ -83,6 +89,7 @@ public class SqliteDB {
         return false;
     }
 
+    // Updates the password of a stored account  
     public static int updatePassword(String service, String username, String password) {
         try {
             getConnection();
@@ -100,6 +107,7 @@ public class SqliteDB {
         return 0;
     }
 
+    // Deletes a specified account 
     public static void deleteAccount(String service, String username) {
         try {
             getConnection();
@@ -115,6 +123,7 @@ public class SqliteDB {
         }
     }
 
+    // Gets all the accounts registered under a service
     public static ResultSet getAccountsFromService(String service) {
         try {
             getConnection();
@@ -128,6 +137,7 @@ public class SqliteDB {
         return null;
     }
 
+    // Gets the encrypted password for a specified account 
     public static String getAccountPassword(String service, String username) {
         try {
             getConnection();
@@ -146,6 +156,7 @@ public class SqliteDB {
         return null;
     }
 
+    // Checks if a username already exists within a service
     public static boolean checkServiceUsernameExists(String service, String username) {
         try {
             getConnection();
@@ -163,6 +174,7 @@ public class SqliteDB {
         return false; 
     }
 
+    // Gets all the required details of the user for login 
     public static ResultSet getUserDetails(String username) {
         try {
             getConnection();
@@ -177,6 +189,7 @@ public class SqliteDB {
         return null;
     }
 
+    // Adds a new account to a service 
     public static void addAccount(String service, String username, String password) {
         try {
             getConnection();
@@ -193,6 +206,7 @@ public class SqliteDB {
         }
     }
 
+    // Gets the counter for which fingerprint the database is up to 
     public static int getCurrentFingerprint() {
         try {
             getConnection();
@@ -209,6 +223,7 @@ public class SqliteDB {
         return 0;
     }
 
+    // Increments the fingerprint counter
     public static void updateCurrentFingerPrint() {
         try {
             getConnection();
@@ -221,6 +236,7 @@ public class SqliteDB {
         }
     }
 
+    // Checks if fignerprint is a match for a user
     public static boolean checkPrints(String username, int fID) {
         try {
             getConnection();
@@ -238,6 +254,7 @@ public class SqliteDB {
         
     }
 
+    // Adds a new user to the PM 
     public static String addUser(String username, String password, String salt, String serial, int fID) {
         try {   
             getConnection();
@@ -268,6 +285,7 @@ public class SqliteDB {
         return null;
     }
 
+    // Establishes connection with the SQL DB 
     private static void getConnection() {
         try {
             if (c != null) return;
@@ -280,6 +298,7 @@ public class SqliteDB {
         
     }
 
+    // Intializes the connection with the database
     private static void initialise() {
         if (!hasData) {
             hasData = true;

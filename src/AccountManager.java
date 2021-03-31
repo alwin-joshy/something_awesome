@@ -6,7 +6,8 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class AccountManager {
- 
+    
+    // Used for adding an account to the password manager
     public static void addAccount(User u)  {
         Common.clearTerminal();
         Common.fancyBanner("Add a new account");
@@ -15,20 +16,21 @@ public class AccountManager {
         String service = s.nextLine().toLowerCase();
         System.out.print("Enter username: ");
         String username = s.nextLine();
-        if (SqliteDB.checkServiceUsernameExists(service, username)) {
+        if (SqliteDB.checkServiceUsernameExists(service, username)) { // If the account already exists, we don't want to overwrite it 
             System.out.println("This account already exists!");
             try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
             return;
         }
        
         String password = getPassword(u);
-        SqliteDB.addAccount(service, username, password);
+        SqliteDB.addAccount(service, username, password); // Adds the account to the database
 
         System.out.println("Success, added new " + service + " account with username " + username);
         try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
         return;
     }
 
+    // To modify an existing account
     public static void modifyAccount(User u) {
         Common.clearTerminal();
         Common.fancyBanner("Modify an existing account");
@@ -42,13 +44,13 @@ public class AccountManager {
         System.out.print("Enter option: ");
         Scanner s = new Scanner(System.in);
         String option = s.nextLine();
-        if (option.equals("1")) {
+        if (option.equals("1")) { // Changes the password and updates the database
             String password = getPassword(u);
             if (SqliteDB.updatePassword(selected.get(0), selected.get(1), password) == 1){
                 System.out.println("Password changed successfully");
                 try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
             }
-        } else if (option.equals("2")) {
+        } else if (option.equals("2")) { // Removes the account from the database
             System.out.print("Are you sure you want to delete this account? Details will be lost permanently and cannot be recovered. Enter y to confirm and anything else to cancel: ");
             option = s.nextLine();
             if (option.equalsIgnoreCase("y")){
@@ -61,7 +63,8 @@ public class AccountManager {
         return;
 
     }
-
+    
+    // Prints out the password of a selected account
     public static void viewAccount(User u) {
         Common.clearTerminal();
         Common.fancyBanner("View account details");
@@ -76,6 +79,7 @@ public class AccountManager {
         s.nextLine();
     }
 
+    // List of all services and accounts 
     public static void listAll(){
         Common.clearTerminal();
         Common.fancyBanner("List of all registered accounts");
@@ -105,7 +109,7 @@ public class AccountManager {
         s.nextLine();
     }
 
-
+    // Reusable code to allow user to enter/generate and confirm a password 
     private static String getPassword(User u) {
         Scanner s = new Scanner(System.in);
         System.out.println("Select from the following options: ");
@@ -147,6 +151,7 @@ public class AccountManager {
         return AESUtil.encrypt(password, u.getKey());
     }
 
+    // Reusable code to allow a user to select an account 
     private static ArrayList<String> selectAccount() {
         Scanner s = new Scanner(System.in);
         System.out.print("Enter service e.g. Google, Facebook, Openlearning: ");

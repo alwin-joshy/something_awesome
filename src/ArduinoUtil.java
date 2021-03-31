@@ -12,6 +12,7 @@ import com.fazecast.jSerialComm.SerialPort;
 
 public class ArduinoUtil {
 
+    // Returns the serial number of a selected Arduino which has been connected 
     public static String addArduino() {
         System.out.print("Connect your Arduino and enter any key when it has been connected: ");
         Scanner s = new Scanner(System.in);
@@ -32,7 +33,7 @@ public class ArduinoUtil {
         s.nextLine();
         SerialPort port = ports[selection];
         String serial = getSerialNumber(port);
-        if (serial == null) {
+        if (serial == null) { // Can't get the serial number 
             System.out.println("\nThis board is not compatible. Returning to main menu...");
             try {Thread.sleep(2000); } catch (InterruptedException e) {e.printStackTrace();}
             return "";
@@ -44,6 +45,7 @@ public class ArduinoUtil {
         
     }
 
+    // Checks if a fingerprint matches one on the fingerprint scanner and returns the fingerprint ID if it is, 0 if it is not, or -1 if encounters an error 
     public static int getFingerprint(String authenticSerial, byte[] salt) {
         SerialPort p = checkArduinoConnection(authenticSerial, salt);
         if (p == null) {
@@ -129,6 +131,7 @@ public class ArduinoUtil {
 
     } 
 
+    // Registers a new fingerprint to the fingerprint database and returns the ID it is assigned 
     public static int addFingerprint(String authenticSerial, byte[] salt) throws IOException {
         SerialPort p = checkArduinoConnection(authenticSerial, salt);
         if (p == null) {
@@ -295,6 +298,7 @@ public class ArduinoUtil {
         
     }
 
+    // Calls a shell script which uploads a specified sketch onto the connected Arduino - there really should be some error checking here 
     private static void uploadSketch(SerialPort port, String sketchDir) {
         try {
             //System.out.println("bash uploadSketch.sh " + sketchDir + " " + port.getSystemPortName());
@@ -310,6 +314,7 @@ public class ArduinoUtil {
         }
     }
 
+    // Runs a shell script which gets the serial number of the connected device 
     private static String getSerialNumber(SerialPort port) {
         String serial = null;
         try {

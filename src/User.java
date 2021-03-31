@@ -1,10 +1,9 @@
 import java.util.ArrayList;
 
 public class User {
-    //private ArrayList<Services> services;
     private String username; 
     private String uid;
-    private String key;
+    private String key; // Encryption key
 
     public User(String username, String uid) {
         this.username = username; 

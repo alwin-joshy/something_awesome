@@ -103,6 +103,7 @@ public class StartScreen {
             }
         }
 
+        // Linking arduino 
         System.out.println("Would you like to link an Arduino to your account? If you do this, your account can only be unlocked when this device is connected.");
         System.out.print("Press enter for yes or any other button for no: ");
         String response = s.nextLine();
@@ -119,12 +120,13 @@ public class StartScreen {
         }
 
         int fID = 0;
+        // Adding fingerprint authentication 
         if (!serial.equals("")) {
             System.out.print("Press enter to add fingerprint verification or any other button to not: ");
             response = s.nextLine();
             if (response.equals("")) {
-                System.out.println("Please hold a finger on the sensor. You can add more fingers later");
-                System.out.println("Checking if fingerprint already registered");
+                System.out.println("\nPlease hold a finger on the sensor. You can add more fingers later");
+                System.out.println("\nChecking if fingerprint already registered\n");
                 fID = ArduinoUtil.getFingerprint(serialHash, salt);
                 System.out.println(fID);
                 if (fID == 0) {
@@ -145,6 +147,7 @@ public class StartScreen {
         String uid = SqliteDB.addUser(username, hash1String, saltString, serialHash, fID);
         System.out.println("Account creation successful!");
         currUser = new User(username, uid);
+        // Generates and sets encryption key 
         String key = HashUtil.generateEncryptionKey(username.toCharArray(), password.toCharArray(), salt);
         currUser.setKey(key);
         Thread.sleep(1000);
@@ -153,7 +156,7 @@ public class StartScreen {
     }
 
    
-
+    // Allows user to log in 
     private boolean login() throws IOException, ParseException, InterruptedException {
         Common.clearTerminal();
         Scanner s = new Scanner(System.in);
@@ -190,7 +193,7 @@ public class StartScreen {
                 if (enteredPassword.equals(actualPass)) {
                     currUser = new User(username, uid);
                     invalid = false;
-
+                    // If a fingerprint has been set 
                     if (fingerID != 0) {
                         fingerID = ArduinoUtil.getFingerprint(serial, saltArray);
                         if (fingerID == - 1 || fingerID == 0) {
@@ -202,14 +205,15 @@ public class StartScreen {
                             Thread.sleep(2000);
                             return false;
                         }
-                    } else if (!serial.equals("")) {
+                    } else if (!serial.equals("")) { // If unique arduino authentication has been set
                         if (ArduinoUtil.checkArduinoConnection(serial, saltArray) == null) {
                             return false;
                         }
                     }
 
                     System.out.println("\nLogin successful!");
-                    String key = HashUtil.generateEncryptionKey(username.toCharArray(), password, saltArray);
+                    // Generates and sets encryption key 
+                    String key = HashUtil.generateEncryptionKey(username.toCharArray(), password, saltArray); 
                     currUser.setKey(key);
                     Thread.sleep(1000);
 
