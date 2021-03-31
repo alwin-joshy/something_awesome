@@ -123,7 +123,10 @@ public class StartScreen {
             System.out.print("Press enter to add fingerprint verification or any other button to not: ");
             response = s.nextLine();
             if (response.equals("")) {
+                System.out.println("Please hold a finger on the sensor. You can add more fingers later");
+                System.out.println("Checking if fingerprint already registered");
                 fID = ArduinoUtil.getFingerprint(serialHash, salt);
+                System.out.println(fID);
                 if (fID == 0) {
                     fID = ArduinoUtil.addFingerprint(serialHash, salt);
                     if (fID == 0) {

@@ -60,7 +60,7 @@ public class ArduinoUtil {
 
         try {
 
-            System.out.println("Place registered finger on sensor");
+            System.out.println("Place finger on sensor");
         
             while (dataIn.hasNext()) {
                 String s = dataIn.next();
@@ -152,8 +152,6 @@ public class ArduinoUtil {
 
             dataOut.write((byte) fID);
             dataOut.flush();
-
-            System.out.println("Please hold a finger on the sensor. You can add more fingers later");
 
             while (dataIn.hasNext()){
                 String s = dataIn.next();
