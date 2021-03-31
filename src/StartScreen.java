@@ -1,31 +1,14 @@
 import java.io.Console;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
-
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.print.attribute.standard.Fidelity;
-
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 public class StartScreen {
     private User currUser;
 
-    public User startup() throws IOException, ParseException, InterruptedException {
+    public User startup() throws IOException, InterruptedException {
         // Show initial options         
         Scanner s = new Scanner(System.in);
 
@@ -55,13 +38,12 @@ public class StartScreen {
         return currUser;
     } 
 
-    private boolean createUser() throws IOException, ParseException, InterruptedException {
+    private boolean createUser() throws IOException, InterruptedException {
         Common.clearTerminal();
         Common.fancyBanner("Create a new account");
         Scanner s = new Scanner(System.in);
         boolean done = false;
         String username = "";
-        JSONObject accountList = new JSONObject();
 
         // Checks that user does not already exist 
         while (!done){
@@ -157,7 +139,7 @@ public class StartScreen {
 
    
     // Allows user to log in 
-    private boolean login() throws IOException, ParseException, InterruptedException {
+    private boolean login() throws IOException, InterruptedException {
         Common.clearTerminal();
         Scanner s = new Scanner(System.in);
         Console c =  System.console();

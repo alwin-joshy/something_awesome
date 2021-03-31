@@ -1,14 +1,7 @@
-import java.util.ArrayList;
 import java.util.Scanner;
 
 
 public class MainScreen {
-
-    private StringGenerator sGen;
-
-    public MainScreen() {
-        sGen = new StringGenerator();
-    }
 
     public void begin(User u) {
         Common.clearTerminal();
@@ -72,6 +65,7 @@ public class MainScreen {
         }
     }
 
+    // Settings screen 
     public void settings(){
         System.out.println("Enter g to set the default configuration for the random password generator");
         System.out.println("Enter x to erase all records. This cannot be undone.");
@@ -102,6 +96,7 @@ public class MainScreen {
         }
     }
 
+    // Prints out all the commands 
     public void printCommands() {
         System.out.println("a - add new account\n"+
                            "m - modify account details/delete account\n"+

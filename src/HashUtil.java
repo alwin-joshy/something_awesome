@@ -1,6 +1,4 @@
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
 
@@ -32,6 +30,7 @@ public class HashUtil {
         return "";
     }
 
+    // Generates the user's encrytpion key of their username + password
     public static String generateEncryptionKey(char[] username, char[] password, byte[] salt) {
         char[] combined = Arrays.copyOf(username, username.length + password.length);
         System.arraycopy(password, 0, combined, username.length, password.length);
