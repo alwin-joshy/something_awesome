@@ -44,15 +44,15 @@ public class ArduinoUtil {
         
     }
 
-    public static int getFingerprint(String username, String authenticSerial, byte[] salt) {
+    public static int getFingerprint(String authenticSerial, byte[] salt) {
         SerialPort p = checkArduinoConnection(authenticSerial, salt);
         if (p == null) {
-            return 0;
+            return -1;
         }
         if (! p.openPort()) {
             System.out.println("Unable to open the port. Returning to main screen");
             try {Thread.sleep(2000); } catch (InterruptedException e) {e.printStackTrace();}
-            return 0;
+            return -1;
         }
         uploadSketch(p, "fingerprint/");
         p.setComPortTimeouts(SerialPort.TIMEOUT_SCANNER, 0, 0);
@@ -88,16 +88,16 @@ public class ArduinoUtil {
                     break;
                 case "messy":
                     System.out.println("Image too messy");
-                    return 0;
+                    return -1;
                 case "communication":
                     System.out.println("Communication error");
-                    return 0;
+                    return -1;
                 case "features":
                     System.out.println("Could not find fingerprint features");
-                    return 0;
+                    return -1;
                 case "unknown":
                     System.out.println("Unknown error");
-                    return 0;
+                    return -1;
             }
 
             s = dataIn.next();
@@ -109,10 +109,10 @@ public class ArduinoUtil {
                     return 0;
                 case "communication":
                     System.out.println("Communication error");
-                    return 0;
+                    return -1;
                 case "unknown":
                     System.out.println("Unknown error");
-                    return 0;
+                    return -1;
             }
 
             s = dataIn.next();

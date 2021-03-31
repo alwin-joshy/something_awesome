@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class AccountManager {
  
-    public static void addAccount()  {
+    public static void addAccount(User u)  {
         Common.clearTerminal();
         Common.fancyBanner("Add a new account");
         Scanner s = new Scanner(System.in);
@@ -21,7 +21,7 @@ public class AccountManager {
             return;
         }
        
-        String password = getPassword();
+        String password = getPassword(u);
         SqliteDB.addAccount(service, username, password);
 
         System.out.println("Success, added new " + service + " account with username " + username);
@@ -29,7 +29,7 @@ public class AccountManager {
         return;
     }
 
-    public static void modifyAccount() {
+    public static void modifyAccount(User u) {
         Common.clearTerminal();
         Common.fancyBanner("Modify an existing account");
         ArrayList<String> selected = selectAccount();
@@ -43,7 +43,7 @@ public class AccountManager {
         Scanner s = new Scanner(System.in);
         String option = s.nextLine();
         if (option.equals("1")) {
-            String password = getPassword();
+            String password = getPassword(u);
             if (SqliteDB.updatePassword(selected.get(0), selected.get(1), password) == 1){
                 System.out.println("Password changed successfully");
                 try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
@@ -62,7 +62,7 @@ public class AccountManager {
 
     }
 
-    public static void viewAccount() {
+    public static void viewAccount(User u) {
         Common.clearTerminal();
         Common.fancyBanner("View account details");
         ArrayList<String> selected = selectAccount();
@@ -70,7 +70,7 @@ public class AccountManager {
         String encryptedPass = SqliteDB.getAccountPassword(selected.get(0), selected.get(1));
         System.out.println("Service: " + selected.get(0));
         System.out.println("Username: " + selected.get(1));
-        System.out.println("Password: " + AESUtil.decrypt(encryptedPass));
+        System.out.println("Password: " + AESUtil.decrypt(encryptedPass, u.getKey()));
         System.out.print("\nEnter any character to return to the main menu: ");
         Scanner s = new Scanner(System.in);
         s.nextLine();
@@ -106,7 +106,7 @@ public class AccountManager {
     }
 
 
-    private static String getPassword() {
+    private static String getPassword(User u) {
         Scanner s = new Scanner(System.in);
         System.out.println("Select from the following options: ");
         System.out.println("1. Generate a random string");
@@ -144,7 +144,7 @@ public class AccountManager {
             System.out.println("Please enter a valid option");
         }
 
-        return AESUtil.encrypt(password);
+        return AESUtil.encrypt(password, u.getKey());
     }
 
     private static ArrayList<String> selectAccount() {

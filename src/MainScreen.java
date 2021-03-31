@@ -23,12 +23,12 @@ public class MainScreen {
                     printCommands();
                     break;
                 case "a": 
-                    AccountManager.addAccount();
+                    AccountManager.addAccount(u);
                     Common.clearTerminal();
                     Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
                 case "m":
-                    AccountManager.modifyAccount();
+                    AccountManager.modifyAccount(u);
                     Common.clearTerminal();
                     Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
@@ -38,7 +38,7 @@ public class MainScreen {
                     Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
                 case "v":
-                    AccountManager.viewAccount();
+                    AccountManager.viewAccount(u);
                     Common.clearTerminal();
                     Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;

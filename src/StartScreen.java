@@ -52,7 +52,6 @@ public class StartScreen {
                 System.out.println("Invalid command - please try again");
             }
         }
-        
         return currUser;
     } 
 
@@ -82,13 +81,16 @@ public class StartScreen {
         String saltString = Base64.encodeBase64String(salt);
         done = false; 
         Console c =  System.console();
+        String password = new String("");
         String hash1String = new String("");
 
         // Gets password, hashes them, and checks that they match
         while (!done) {
 
             System.out.print("Enter password: ");
-            hash1String = HashUtil.hashPassword(salt, c.readPassword());
+            char[] passwordArray = c.readPassword();
+            password = passwordArray.toString();
+            hash1String = HashUtil.hashPassword(salt, passwordArray);
 
             System.out.print("Confirm password: ");
             String hash2String = HashUtil.hashPassword(salt, c.readPassword());
@@ -106,39 +108,48 @@ public class StartScreen {
         String response = s.nextLine();
 
         String serial = "";
+        String serialHash = "";
         if (response.equals("")) {
             String serialReturned = ArduinoUtil.addArduino();
             if (serialReturned.equals("")) {
                 return false;
             }
             serial = serialReturned;
+            serialHash = HashUtil.hashPassword(salt, serial.toCharArray());
         }
-
-        String serialHash = HashUtil.hashPassword(salt, serial.toCharArray());
 
         int fID = 0;
         if (!serial.equals("")) {
             System.out.print("Press enter to add fingerprint verification or any other button to not: ");
             response = s.nextLine();
             if (response.equals("")) {
-                fID = ArduinoUtil.addFingerprint(serialHash, salt);
+                fID = ArduinoUtil.getFingerprint(serialHash, salt);
                 if (fID == 0) {
+                    fID = ArduinoUtil.addFingerprint(serialHash, salt);
+                    if (fID == 0) {
+                        Thread.sleep(2000);
+                        return false;
+                    }
+                } else if (fID == -1) {
                     Thread.sleep(2000);
                     return false;
                 }
+                
             }
         }        
 
         // Adds to database
         String uid = SqliteDB.addUser(username, hash1String, saltString, serialHash, fID);
-
         System.out.println("Account creation successful!");
         currUser = new User(username, uid);
+        String key = HashUtil.generateEncryptionKey(username.toCharArray(), password.toCharArray(), salt);
+        currUser.setKey(key);
         Thread.sleep(1000);
-
         return true; 
         
     }
+
+   
 
     private boolean login() throws IOException, ParseException, InterruptedException {
         Common.clearTerminal();
@@ -178,8 +189,8 @@ public class StartScreen {
                     invalid = false;
 
                     if (fingerID != 0) {
-                        fingerID = ArduinoUtil.getFingerprint(username, serial, saltArray);
-                        if (fingerID == 0) {
+                        fingerID = ArduinoUtil.getFingerprint(serial, saltArray);
+                        if (fingerID == - 1 || fingerID == 0) {
                             Thread.sleep(2000);
                             return false;
                         }
@@ -195,7 +206,11 @@ public class StartScreen {
                     }
 
                     System.out.println("\nLogin successful!");
+                    String key = HashUtil.generateEncryptionKey(username.toCharArray(), password, saltArray);
+                    currUser.setKey(key);
                     Thread.sleep(1000);
+
+                    return true; 
                 }
 
             }
@@ -208,6 +223,6 @@ public class StartScreen {
             }
         }
 
-        return !invalid; 
+        return false; 
     }
 }

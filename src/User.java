@@ -4,6 +4,7 @@ public class User {
     //private ArrayList<Services> services;
     private String username; 
     private String uid;
+    private String key;
 
     public User(String username, String uid) {
         this.username = username; 
@@ -16,6 +17,14 @@ public class User {
     
     public String getuid() {
         return uid;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getKey() {
+        return key;
     }
 
 }
