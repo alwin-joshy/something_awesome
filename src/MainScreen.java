@@ -1,4 +1,14 @@
+import java.io.Console;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
+
+import javax.sql.RowSet;
+import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetFactory;
+import javax.sql.rowset.RowSetProvider;
+
+import org.apache.commons.codec.binary.Base64;
 
 
 public class MainScreen {
@@ -10,47 +20,44 @@ public class MainScreen {
         System.out.print("Enter command: ");
         Scanner s = new Scanner(System.in);
         String command = s.nextLine();
+        boolean flag = true;
         while (!command.equals("q")) {
             switch (command) {
                 case "?":
                     printCommands();
+                    flag = false;
                     break;
                 case "a": 
                     AccountManager.addAccount(u);
-                    Common.clearTerminal();
-                    Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
                 case "m":
                     AccountManager.modifyAccount(u);
-                    Common.clearTerminal();
-                    Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
                 case "l":
                     AccountManager.listAll();
-                    Common.clearTerminal();
-                    Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
                 case "v":
                     AccountManager.viewAccount(u);
-                    Common.clearTerminal();
-                    Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
                 case "g":
                     System.out.println(StringGenerator.generateString());
+                    flag = false; 
                     break;
                 case "s":
-                    settings();
-                    Common.clearTerminal();
-                    Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
+                    settings(u);
                     break;
                 case "c":
-                    Common.clearTerminal();
-                    Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
                     break;
                 default:
                     System.out.println("Unknown command. Please enter a valid command (press ? to see full list)");
+                    flag = false; 
                     break;
             }
+            if (flag) {
+                Common.clearTerminal();
+                Common.fancyBanner("Hi " + u.getUsername() + "! Press ? to view commands");
+            }
+
             System.out.print("Enter command: ");
             command = s.nextLine();
         }
@@ -66,9 +73,11 @@ public class MainScreen {
     }
 
     // Settings screen 
-    public void settings(){
+    public void settings(User u){
         System.out.println("Enter g to set the default configuration for the random password generator");
         System.out.println("Enter x to erase all records. This cannot be undone.");
+        System.out.println("Enter p to change master password");
+        System.out.println("Enter f to add a new fingerprint");
         System.out.println("Enter b to return to the main menu.");
         System.out.print("Enter command: ");
         Scanner s = new Scanner(System.in);
@@ -86,6 +95,11 @@ public class MainScreen {
                     try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
                 }
                 break;
+            case "p":
+                changePassword(u);
+                break;
+            case "f":
+                //System.out.println(x);
             case "b":
                 break;
             default:
@@ -107,4 +121,71 @@ public class MainScreen {
                            "c - clear the console\n"+
                            "q - logout");
     }
+
+    private void changePassword(User u) {
+        Common.clearTerminal();
+        Common.fancyBanner("Change master password");
+        String oldPass = "";
+        String salt = "";
+    
+        try {
+            ResultSet res = SqliteDB.getUserDetails(u.getUsername());
+            oldPass = res.getString("password");
+            salt = res.getString("salt");
+        } catch (SQLException e){
+            e.printStackTrace();
+            System.exit(0);
+        }
+        byte[] saltArray = Base64.decodeBase64(salt);
+        Console c = System.console();
+        System.out.print("Enter old password: ");
+        if (oldPass.equals(HashUtil.hashPassword(saltArray, c.readPassword()))) {
+            char[] newPassArray;
+            String newPass1 = "";
+            while (true) {
+                System.out.print("Enter new password: ");
+                newPassArray = c.readPassword();
+                newPass1 = HashUtil.hashPassword(saltArray, newPassArray);
+                System.out.print("Confirm new password: ");
+                if (newPass1.equals(HashUtil.hashPassword(saltArray, c.readPassword()))) break;
+                System.out.println("Passwords don't match. Please try again");
+            }
+            String newKey =  HashUtil.generateEncryptionKey(u.getUsername().toCharArray(), newPassArray, saltArray);
+            try {
+                reEncryptPasswords(u.getKey(), newKey);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                System.exit(0);
+            } finally {
+                SqliteDB.closeConnection();
+            }
+            u.setKey(newKey);
+            SqliteDB.updateMasterPassword(newPass1);
+            System.out.println("Password changed successfully!");
+       } else {
+           System.out.println("Wrong password. Returning to main screen...");
+       }
+
+       try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
+       
+    }
+    
+    private void reEncryptPasswords(String oldKey, String newKey) throws SQLException {
+        RowSetFactory f = RowSetProvider.newFactory();
+        CachedRowSet r = f.createCachedRowSet(); // Found this here https://stackoverflow.com/questions/25493837/java-cant-use-resultset-after-connection-close
+        r.populate(SqliteDB.allAccountsForUser());
+        SqliteDB.closeConnection();
+        while (r.next()) {
+            String s = r.getString("service");
+            String u = r.getString("username");
+            System.out.println(s + " " + u);
+            String pass = SqliteDB.getAccountPassword(s, u);
+            String unencryptedPass = AESUtil.decrypt(pass, oldKey);
+            String encryptedPass = AESUtil.encrypt(unencryptedPass, newKey);
+            SqliteDB.updatePassword(s, u, encryptedPass);
+        }
+    }
+    
 }
+
+

@@ -9,6 +9,9 @@ import com.fazecast.jSerialComm.SerialPort;
 // This is a really disgustingly big class but only because I have to handle all the possible outputs from the enroll and fingerprint arduino methods 
 // in here rather than having them be handled on the Arduino :(
 
+// Please note that I did not write the C++ libraries used in the enrol and fingerprint methods. All I did was edit the example ino files provided to make
+// them work well with the Java code. The original library can be found here https://github.com/adafruit/Adafruit-Fingerprint-Sensor-Library 
+
 public class ArduinoUtil {
 
     // Returns the serial number of a selected Arduino which has been connected 

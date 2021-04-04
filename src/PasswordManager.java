@@ -15,6 +15,7 @@ public class PasswordManager {
         this.currUser = null;
     }
 
+    // Main function 
     public static void main(String[] args) throws Exception {
         PasswordManager pm = new PasswordManager();
         while (true) {
@@ -29,16 +30,19 @@ public class PasswordManager {
         return currUser;
     }
 
+    // Start screen 
     public void startup() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ParseException, InterruptedException {
         currUser = ss.startup();
     }
 
+    // Main screen 
     public void beginMain() {
         SqliteDB.setCurrUserID(currUser.getuid());
         StringGenerator.loadDefault();
         ms.begin(currUser);
     }
 
+    // Logs the current user out 
     public void logout() {
         SqliteDB.setCurrUserID(null);
         currUser = null;
