@@ -1,4 +1,5 @@
 import java.io.Console;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -99,7 +100,7 @@ public class MainScreen {
                 changePassword(u);
                 break;
             case "f":
-                //System.out.println(x);
+                addFingerPrint(u);
             case "b":
                 break;
             default:
@@ -108,6 +109,38 @@ public class MainScreen {
                 break;
                 
         }
+    }
+
+    private void addFingerPrint(User u) {
+
+        try {
+            ResultSet r = SqliteDB.getUserDetails(u.getUsername());
+            String serial = r.getString("serial");
+            String salt = r.getString("salt");
+            if (serial == null) {
+                System.out.println("No arduino associated with this account. Please add an Arduino first");
+                return;
+            }
+
+            int slot = SqliteDB.getFingerprintSlot();
+            System.out.println("You have enrolled " + (slot-1) + "/5 fingerprints");
+            if (slot == 6) {
+                try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
+                return;
+            }
+
+            int fID = ArduinoUtil.newFingerprintWrapper(serial, Base64.decodeBase64(salt));
+            if (fID == 0) {
+                Thread.sleep(2000);
+                return; 
+            }
+
+            SqliteDB.updateFingerprintSlot(slot, fID);
+
+        } catch (SQLException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     // Prints out all the commands 

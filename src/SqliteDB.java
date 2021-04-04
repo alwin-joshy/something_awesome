@@ -237,6 +237,37 @@ public class SqliteDB {
         return 0;
     }
 
+    public static int getFingerprintSlot() {
+        try {
+            int i = 1;
+            Statement s = c.createStatement();
+            ResultSet r = s.executeQuery("SELECT f1, f2, f3, f4, f5 from login where rowid=" + uid);
+            while (i <= 5) {
+                if (r.getInt("f"+i) == 0) {
+                    return i;
+                }
+                i++;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+
+        return 0;
+    }
+
+    public static void updateFingerprintSlot(int slot, int fID) {
+        try {
+            getConnection();
+            PreparedStatement s2 = c.prepareStatement("UPDATE login SET f"+ slot + " = ? where rowid="+uid);
+            s2.setInt(1, fID);
+            s2.executeUpdate();
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
     // Increments the fingerprint counter
     public static void updateCurrentFingerPrint() {
         try {

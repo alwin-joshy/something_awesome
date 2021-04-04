@@ -41,7 +41,7 @@ public class ArduinoUtil {
             return "";
         }
 
-        System.out.println("Arduino connection successful!");
+        System.out.println("Arduino connection successful!\n");
 
         return serial;
         
@@ -120,8 +120,6 @@ public class ArduinoUtil {
             }
 
             s = dataIn.next();
-            System.out.println(s);
-
             return Integer.parseInt(s); 
 
         } finally {
@@ -129,9 +127,31 @@ public class ArduinoUtil {
             p.closePort();
         }
 
-        
+    }
 
-    } 
+
+    public static int newFingerprintWrapper(String serial, byte[] salt) {
+        int fID = 0;
+        try {
+            System.out.println("\n");
+            Common.fancyBanner("Checking if fingerprint is already registered");
+            fID = getFingerprint(serial, salt);
+            if (fID == 0) {
+                System.out.println("\n");
+                Common.fancyBanner("Adding new fingerprint");
+                fID = addFingerprint(serial, salt);
+                if (fID == 0) {
+                    return 0 ;
+                }
+            } else if (fID == -1) {
+                return 0 ;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return fID;
+    }
 
     // Registers a new fingerprint to the fingerprint database and returns the ID it is assigned 
     public static int addFingerprint(String authenticSerial, byte[] salt) throws IOException {
@@ -150,6 +170,8 @@ public class ArduinoUtil {
         p.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
         
         Scanner dataIn = new Scanner(p.getInputStream());
+
+        System.out.println("Place finger on sensor");
 
 
         try {
@@ -331,7 +353,7 @@ public class ArduinoUtil {
     }
     
     public static SerialPort checkArduinoConnection(String authenticSerial, byte[] salt) {
-        System.out.println("Please connect the arduino associated with this account.");
+        System.out.println("\nPlease connect the arduino associated with this account.");
         System.out.println("Press any key when you have connected it");
         Scanner s = new Scanner(System.in);
         s.nextLine();

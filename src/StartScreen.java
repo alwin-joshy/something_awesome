@@ -86,7 +86,7 @@ public class StartScreen {
         }
 
         // Linking arduino 
-        System.out.println("Would you like to link an Arduino to your account? If you do this, your account can only be unlocked when this device is connected.");
+        System.out.println("\nWould you like to link an Arduino to your account? If you do this, your account can only be unlocked when this device is connected.");
         System.out.print("Press enter for yes or any other button for no: ");
         String response = s.nextLine();
 
@@ -107,19 +107,10 @@ public class StartScreen {
             System.out.print("Press enter to add fingerprint verification or any other button to not: ");
             response = s.nextLine();
             if (response.equals("")) {
-                System.out.println("\nPlease hold a finger on the sensor. You can add more fingers later");
-                System.out.println("\nChecking if fingerprint already registered\n");
-                fID = ArduinoUtil.getFingerprint(serialHash, salt);
-                System.out.println(fID);
+                fID = ArduinoUtil.newFingerprintWrapper(serialHash, salt);
                 if (fID == 0) {
-                    fID = ArduinoUtil.addFingerprint(serialHash, salt);
-                    if (fID == 0) {
-                        Thread.sleep(2000);
-                        return false;
-                    }
-                } else if (fID == -1) {
                     Thread.sleep(2000);
-                    return false;
+                    return false; 
                 }
                 
             }

@@ -18,5 +18,9 @@ public class Common {
         System.out.println("\n");
 
     }
+
+    public static void printDivider() {
+        System.out.println("----------------------------------");
+    }
     
 }
