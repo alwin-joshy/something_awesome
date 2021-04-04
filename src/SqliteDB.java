@@ -260,11 +260,26 @@ public class SqliteDB {
     public static void updateFingerprintSlot(int slot, int fID) {
         try {
             getConnection();
-            PreparedStatement s2 = c.prepareStatement("UPDATE login SET f"+ slot + " = ? where rowid="+uid);
-            s2.setInt(1, fID);
-            s2.executeUpdate();
+            PreparedStatement p = c.prepareStatement("UPDATE login SET f"+ slot + " = ? where rowid="+uid);
+            p.setInt(1, fID);
+            p.executeUpdate();
         } catch (SQLException e){
             e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+    }
+
+    public static void updateSerial(String serial) {
+        try {
+            getConnection();
+            PreparedStatement p = c.prepareStatement("UPDATE login SET serial=? where rowid="+uid);
+            p.setString(1, serial);
+            p.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
         }
     }
 

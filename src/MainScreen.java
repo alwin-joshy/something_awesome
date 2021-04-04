@@ -78,6 +78,7 @@ public class MainScreen {
         System.out.println("Enter g to set the default configuration for the random password generator");
         System.out.println("Enter x to erase all records. This cannot be undone.");
         System.out.println("Enter p to change master password");
+        System.out.println("Enter a to set/change device for arduino authentication");
         System.out.println("Enter f to add a new fingerprint");
         System.out.println("Enter b to return to the main menu.");
         System.out.print("Enter command: ");
@@ -101,6 +102,10 @@ public class MainScreen {
                 break;
             case "f":
                 addFingerPrint(u);
+                break;
+            case "a":
+                addArduino(u);
+                break;
             case "b":
                 break;
             default:
@@ -109,6 +114,45 @@ public class MainScreen {
                 break;
                 
         }
+    }
+
+    private void addArduino(User u) {
+        String serial = "";
+        String salt = "";
+        try {
+            ResultSet r = SqliteDB.getUserDetails(u.getUsername());
+            serial = r.getString("serial");
+            salt = r.getString("salt");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        } finally {
+            SqliteDB.closeConnection();
+        }
+
+        // If there is already a connected device
+        if (!serial.equals("")) {
+            System.out.println("There is already a device associated with this account. Changing this may make your account inaccessible if you have fingerprint authentication enabled. ");
+            System.out.print("Are you sure you want to proceed? Enter y to continue or any other button to return to main menu: ");
+            Scanner s = new Scanner(System.in);
+            String confirm = s.nextLine();
+            if (!confirm.equalsIgnoreCase("y")) {
+                return;
+            }
+        }
+
+        serial = ArduinoUtil.addArduino();
+        if (serial.equals("")) {
+            return;
+        }
+
+        String serialHash = HashUtil.hashPassword(Base64.decodeBase64(salt), serial.toCharArray());
+        SqliteDB.updateSerial(serialHash);
+
+        System.out.println("Sucessfully added device!");
+        try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
+
+
     }
 
     private void addFingerPrint(User u) {
