@@ -8,6 +8,8 @@ All the required libraries are included in the lib directory.
 Arduino-cli is also required for any arduino-based authentication in this program to work. 
 This program was developed for Linux and will not work on Windows or OSX
 Only Arduino UNO R3 has been tested for compatability, but other chips which have a serial number should work. 
-The fingerprint sensor used is the is the Adafruit fingerprint sensor. All code used for the arduino is modified versions of the example code provided in the library
+The fingerprint sensor used is the is the Adafruit fingerprint sensor. 
 
+## Code attribution
 
+I did not write the Arduino code or C++ for the enroll and fingerprint sketches. The arduino sketches are modified versions of the sample code found in the Adafruit fingerprint library (https://github.com/adafruit/Adafruit-Fingerprint-Sensor-Library) to make them work more easily with Java.
