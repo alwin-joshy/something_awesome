@@ -1,14 +1,15 @@
 ## Getting Started
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+Welcome to the Awesome Password Manager. This application allows you to securely store all of your credentials across multiple services in one place. Make an account to get started 
 
-## Folder Structure
+## Dependencies
 
-The workspace contains two folders by default, where:
+All the required libraries are included in the lib directory. 
+Arduino-cli is also required for any arduino-based authentication in this program to work. 
+This program was developed for Linux and will not work on Windows or OSX
+Only Arduino UNO R3 has been tested for compatability, but other chips which have a serial number should work. 
+The fingerprint sensor used is the is the Adafruit fingerprint sensor. 
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+## Code attribution
 
-## Dependency Management
-
-The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-pack/blob/master/release-notes/v0.9.0.md#work-with-jar-files-directly).
+I did not write the Arduino code or C++ for the enroll and fingerprint sketches. The arduino sketches are modified versions of the sample code found in the Adafruit fingerprint library (https://github.com/adafruit/Adafruit-Fingerprint-Sensor-Library) to make them work more easily with Java.
