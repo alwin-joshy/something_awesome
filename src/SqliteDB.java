@@ -384,6 +384,7 @@ public class SqliteDB {
         }
     }
 
+    // Closes connection to the SQL server
     public static void closeConnection() {
         if (c != null) {
             try {
