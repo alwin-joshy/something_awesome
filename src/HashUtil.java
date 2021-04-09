@@ -18,7 +18,7 @@ public class HashUtil {
         return salt;
     }
 
-    // Hashes a password and returns the hex string
+    // Hashes a password with the given salt and returns the hex string
     public static String hash(byte[] salt, char[] pass){
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
@@ -32,6 +32,7 @@ public class HashUtil {
         return "";
     }
 
+    // Regular SHA256 hashing without a salt - used for usernames where it isn't AS important that they aren't found
     public static String hash(byte[] pass) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

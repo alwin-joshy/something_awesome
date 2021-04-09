@@ -152,6 +152,7 @@ public class StringGenerator {
         return values;
    }
 
+   // To set the length of the generated password 
     private static int getGeneratorLength() {
         int length;
         Scanner s = new Scanner(System.in);
@@ -166,6 +167,7 @@ public class StringGenerator {
         return length;
     }
 
+    // Interface for obtaining configuration for password generator
     private static ArrayList<Boolean> getGeneratorConfig() {
         ArrayList<Boolean> v;
         Scanner s = new Scanner(System.in);

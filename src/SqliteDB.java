@@ -72,19 +72,6 @@ public class SqliteDB {
 
     } 
 
-
-    public static ResultSet getallUserHash() {
-        try {
-            getConnection();
-            Statement s = c.createStatement();
-            return s.executeQuery("SELECT username, salt from login");
-        } catch (SQLException e){
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
     // Checks if the username already exists in the PM 
     public static boolean checkUsernameExists(String username) {
         try {
@@ -218,6 +205,7 @@ public class SqliteDB {
         }
     }
 
+    // Updates the master password and salt for the password manager 
     public static void updateMasterPassword(String newPass, String newSalt) {
         try {
             getConnection();
@@ -251,6 +239,7 @@ public class SqliteDB {
         return 0;
     }
 
+    // Gets which slot to store the fingerprint in 
     public static int getFingerprintSlot() {
         try {
             int i = 1;
@@ -271,6 +260,7 @@ public class SqliteDB {
         return 0;
     }
 
+    // Updates a fingerprint slot to store the correct fingerprint ID 
     public static void updateFingerprintSlot(int slot, int fID) {
         try {
             getConnection();
@@ -284,6 +274,7 @@ public class SqliteDB {
         }
     }
 
+    // Updates the serial number of the device used to unlock the account 
     public static void updateSerial(String serial) {
         try {
             getConnection();

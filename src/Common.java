@@ -23,10 +23,7 @@ public class Common {
 
     }
 
-    public static void printDivider() {
-        System.out.println("----------------------------------");
-    }
-
+    // Checks a password based on the NIST standard of min. 8 characters long and uncommon
     public static boolean checkPassword(String password) {
         if (password.length() < 8) {
             System.out.println("Password is too short. Please enter a longer password (at least 8 characters)"); 

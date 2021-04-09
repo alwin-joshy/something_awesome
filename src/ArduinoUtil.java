@@ -129,7 +129,7 @@ public class ArduinoUtil {
 
     }
 
-
+    // Just a wrapper for enrolling a new fingerprint which checks if the fingerpritn is already in the database 
     public static int newFingerprintWrapper(String serial, byte[] salt) {
         int fID = 0;
         try {
@@ -351,14 +351,14 @@ public class ArduinoUtil {
 
         return serial;
     }
-    
+    // Checks to see if linked arduino is connected to the PC
     public static SerialPort checkArduinoConnection(String authenticSerial, byte[] salt) {
         System.out.println("\nPlease connect the arduino associated with this account.");
         System.out.println("Press any key when you have connected it");
         Scanner s = new Scanner(System.in);
         s.nextLine();
 
-        // Not sure how this will work if there are multiple comm ports/multiple arduinos connected. Can solve this with the authentication
+        
         SerialPort port = null;
         SerialPort ports[] = SerialPort.getCommPorts();
         for (int i = 1; i < ports.length; i++) {
@@ -368,6 +368,7 @@ public class ArduinoUtil {
             }
         }
 
+        // If not connected 
         if (port == null) {
             System.out.println("Could not find authenticated Arduino. Ensure that you have connected the same Arduino you used in account creation.");
             System.out.println("Returning to main screen");
@@ -375,6 +376,7 @@ public class ArduinoUtil {
             return null;
         }
         
+        // Checks that the port can be opened
         if (port.openPort()) {
             System.out.println("Successfully opened the port");
             try {Thread.sleep(1000); } catch (InterruptedException e) {e.printStackTrace();}

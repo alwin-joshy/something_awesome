@@ -1,5 +1,4 @@
 import java.io.Console;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -32,6 +31,7 @@ public class AccountManager {
         return;
     }
 
+    // Goes through all the accounts in a service to check if a username already exists
     private static boolean checkServiceUsernameExists(String service, String userToCheck, User u) {
         ResultSet r = SqliteDB.getAccountsFromService(service);
         try {
@@ -48,7 +48,6 @@ public class AccountManager {
         }
 
         return false;
-
     }
 
     // To modify an existing account
@@ -110,9 +109,9 @@ public class AccountManager {
             String prev_service = null;
             String curr_service;
             int i = 1;
-            do {
+            do { // Loops through all the stored accounts
                 curr_service = res.getString("service");
-                if (!curr_service.equals(prev_service)){
+                if (!curr_service.equals(prev_service)){ // Basically so that each service is split up nicely
                     i = 1;
                     System.out.println(curr_service);
                     prev_service = curr_service;
@@ -142,7 +141,7 @@ public class AccountManager {
             int option = s.nextInt();
             s.nextLine();
             boolean confirm = false;
-            if (option == 1) {
+            if (option == 1) { // If they want a random string as the password 
                 while (!confirm) {
                     password = StringGenerator.generateString();
                     System.out.println("\nThe generated password is: " + password);
@@ -153,7 +152,7 @@ public class AccountManager {
                     }
                 }
                 break;
-            } else if (option == 2) {
+            } else if (option == 2) { // If they want to enter a password
                 while (!confirm) {
                     Console c =  System.console();
                     System.out.print("Enter password: ");
@@ -179,7 +178,7 @@ public class AccountManager {
         return AESUtil.encrypt(password, u.getKey());
     }
 
-    // Reusable code to allow a user to select an account 
+    // Reusable code to allow a user to select an account from a list 
     private static ArrayList<String> selectAccount(User u) {
         Scanner s = new Scanner(System.in);
         System.out.print("Enter service e.g. Google, Facebook, Openlearning: ");
