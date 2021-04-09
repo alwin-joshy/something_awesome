@@ -13,3 +13,5 @@ The fingerprint sensor used is the is the Adafruit fingerprint sensor.
 ## Code attribution
 
 I did not write the Arduino code or C++ for the enroll and fingerprint sketches. The arduino sketches are modified versions of the sample code found in the Adafruit fingerprint library (https://github.com/adafruit/Adafruit-Fingerprint-Sensor-Library) to make them work more easily with Java.
+
+The most common passwords list was found at https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10-million-password-list-top-1000000.txt

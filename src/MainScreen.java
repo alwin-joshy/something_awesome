@@ -1,12 +1,8 @@
 import java.io.Console;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-import javax.sql.RowSet;
 import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetFactory;
 import javax.sql.rowset.RowSetProvider;
@@ -37,7 +33,7 @@ public class MainScreen {
                     AccountManager.modifyAccount(u);
                     break;
                 case "l":
-                    AccountManager.listAll();
+                    AccountManager.listAll(u);
                     break;
                 case "v":
                     AccountManager.viewAccount(u);
@@ -148,7 +144,7 @@ public class MainScreen {
             return;
         }
 
-        String serialHash = HashUtil.hashPassword(Base64.decodeBase64(salt), serial.toCharArray());
+        String serialHash = HashUtil.hash(Base64.decodeBase64(salt), serial.toCharArray());
         SqliteDB.updateSerial(serialHash);
 
         System.out.println("Sucessfully added device!");
@@ -204,31 +200,35 @@ public class MainScreen {
         Common.clearTerminal();
         Common.fancyBanner("Change master password");
         String oldPass = "";
-        String salt = "";
+        String oldSalt = "";
     
         try {
-            ResultSet res = SqliteDB.getUserDetails(u.getUsername());
+            ResultSet res = SqliteDB.getUserDetails(u.getUsernameHash());
             oldPass = res.getString("password");
-            salt = res.getString("salt");
+            oldSalt = res.getString("salt");
         } catch (SQLException e){
             e.printStackTrace();
             System.exit(0);
+        } finally {
+            SqliteDB.closeConnection();
         }
-        byte[] saltArray = Base64.decodeBase64(salt);
+        byte[] oldSaltArray = Base64.decodeBase64(oldSalt);
         Console c = System.console();
         System.out.print("Enter old password: ");
-        if (oldPass.equals(HashUtil.hashPassword(saltArray, c.readPassword()))) {
+        if (oldPass.equals(HashUtil.hash(oldSaltArray, c.readPassword()))) {
+            byte[] newSalt = HashUtil.saltGen();
             char[] newPassArray;
-            String newPass1 = "";
+            String newPass = "";
             while (true) {
                 System.out.print("Enter new password: ");
                 newPassArray = c.readPassword();
-                newPass1 = HashUtil.hashPassword(saltArray, newPassArray);
+                //if (!Common.checkPassword(new String(newPassArray))) continue;
+                newPass = HashUtil.hash(newSalt, newPassArray);
                 System.out.print("Confirm new password: ");
-                if (newPass1.equals(HashUtil.hashPassword(saltArray, c.readPassword()))) break;
+                if (newPass.equals(HashUtil.hash(newSalt, c.readPassword()))) break;
                 System.out.println("Passwords don't match. Please try again");
             }
-            String newKey =  HashUtil.generateEncryptionKey(u.getUsername().toCharArray(), newPassArray, saltArray);
+            String newKey =  HashUtil.generateEncryptionKey(u.getUsername().toCharArray(), newPassArray, newSalt);
             try {
                 reEncryptPasswords(u.getKey(), newKey);
             } catch (SQLException e) {
@@ -238,7 +238,7 @@ public class MainScreen {
                 SqliteDB.closeConnection();
             }
             u.setKey(newKey);
-            SqliteDB.updateMasterPassword(newPass1);
+            SqliteDB.updateMasterPassword(newPass, Base64.encodeBase64String(newSalt));
             System.out.println("Password changed successfully!");
        } else {
            System.out.println("Wrong password. Returning to main screen...");
@@ -256,7 +256,6 @@ public class MainScreen {
         while (r.next()) {
             String s = r.getString("service");
             String u = r.getString("username");
-            System.out.println(s + " " + u);
             String pass = SqliteDB.getAccountPassword(s, u);
             String unencryptedPass = AESUtil.decrypt(pass, oldKey);
             String encryptedPass = AESUtil.encrypt(unencryptedPass, newKey);

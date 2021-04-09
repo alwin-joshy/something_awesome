@@ -362,7 +362,7 @@ public class ArduinoUtil {
         SerialPort port = null;
         SerialPort ports[] = SerialPort.getCommPorts();
         for (int i = 1; i < ports.length; i++) {
-            if (HashUtil.hashPassword(salt, getSerialNumber(ports[i]).toCharArray()).equals(authenticSerial)) {
+            if (HashUtil.hash(salt, getSerialNumber(ports[i]).toCharArray()).equals(authenticSerial)) {
                 port = ports[i];
                 break;
             }

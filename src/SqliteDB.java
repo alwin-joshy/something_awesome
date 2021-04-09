@@ -62,7 +62,7 @@ public class SqliteDB {
     public static ResultSet allAccountsForUser() {
         try {
             getConnection();
-            String q = "SELECT service, username from user" + uid + "_data ORDER BY service ASC, username ASC;";
+            String q = "SELECT service, username from user" + uid + "_data ORDER BY service ASC;";
             Statement s = c.createStatement();
             return s.executeQuery(q);
         } catch (SQLException e) {
@@ -71,6 +71,19 @@ public class SqliteDB {
         return null;
 
     } 
+
+
+    public static ResultSet getallUserHash() {
+        try {
+            getConnection();
+            Statement s = c.createStatement();
+            return s.executeQuery("SELECT username, salt from login");
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 
     // Checks if the username already exists in the PM 
     public static boolean checkUsernameExists(String username) {
@@ -205,13 +218,14 @@ public class SqliteDB {
         }
     }
 
-    public static void updateMasterPassword(String newPass) {
+    public static void updateMasterPassword(String newPass, String newSalt) {
         try {
             getConnection();
-            String q = "UPDATE login SET password=? WHERE rowid=?";
+            String q = "UPDATE login SET password=?, salt=? WHERE rowid=?";
             PreparedStatement prep = c.prepareStatement(q);
             prep.setString(1, newPass);
-            prep.setInt(2, Integer.parseInt(uid));
+            prep.setString(2, newSalt);
+            prep.setInt(3, Integer.parseInt(uid));
             prep.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

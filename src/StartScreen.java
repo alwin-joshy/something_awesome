@@ -2,6 +2,7 @@ import java.io.Console;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -46,23 +47,26 @@ public class StartScreen {
         Scanner s = new Scanner(System.in);
         boolean done = false;
         String username = "";
+        String usernameHash = "";
+        byte[] salt = HashUtil.saltGen();
+        String saltString = Base64.encodeBase64String(salt);
 
         // Checks that user does not already exist 
         while (!done){
             System.out.print("Enter username: ");
             username = s.nextLine();
-            if (SqliteDB.checkUsernameExists(username)) {
+            usernameHash = HashUtil.hash(username.getBytes(StandardCharsets.UTF_8));
+            if (SqliteDB.checkUsernameExists(usernameHash)) {
                 System.out.println("This username has already been taken. Please try another one.");
             } else {
                 done = true;
             }
         }
-
         // https://stackoverflow.com/questions/8138411/masking-password-input-from-the-console-java
         // Generating the salt
         
-        byte[] salt = HashUtil.saltGen();
-        String saltString = Base64.encodeBase64String(salt);
+       
+
         done = false; 
         Console c =  System.console();
         String password = new String("");
@@ -74,13 +78,13 @@ public class StartScreen {
             System.out.print("Enter password: ");
             char[] passwordArray = c.readPassword();
             password = new String(passwordArray);
-            if (!Common.checkPassword(password)) {
-                continue;
-            }
-            hash1String = HashUtil.hashPassword(salt, passwordArray);
+            // if (!Common.checkPassword(password)) {
+            //     continue;
+            // }
+            hash1String = HashUtil.hash(salt, passwordArray);
 
             System.out.print("Confirm password: ");
-            String hash2String = HashUtil.hashPassword(salt, c.readPassword());
+            String hash2String = HashUtil.hash(salt, c.readPassword());
 
             if (!hash1String.equals(hash2String)) {
                 System.out.println("Passwords don't match! Try again");
@@ -102,7 +106,7 @@ public class StartScreen {
                 return false;
             }
             serial = serialReturned;
-            serialHash = HashUtil.hashPassword(salt, serial.toCharArray());
+            serialHash = HashUtil.hash(salt, serial.toCharArray());
         }
 
         int fID = 0;
@@ -121,9 +125,9 @@ public class StartScreen {
         }        
 
         // Adds to database
-        String uid = SqliteDB.addUser(username, hash1String, saltString, serialHash, fID);
+        String uid = SqliteDB.addUser(usernameHash, hash1String, saltString, serialHash, fID);
         System.out.println("Account creation successful!");
-        currUser = new User(username, uid);
+        currUser = new User(username, usernameHash, uid);
         // Generates and sets encryption key 
         String key = HashUtil.generateEncryptionKey(username.toCharArray(), password.toCharArray(), salt);
         currUser.setKey(key);
@@ -146,8 +150,9 @@ public class StartScreen {
             System.out.print("Enter password: ");
             char[] password = c.readPassword();
             // If there are no users yet, there is obviously no way they can sign in
-            if (SqliteDB.checkUsernameExists(username)) {
-                ResultSet res = SqliteDB.getUserDetails(username);
+            String userHash = HashUtil.hash(username.getBytes(StandardCharsets.UTF_8));
+            if (SqliteDB.checkUsernameExists(userHash)) {
+                ResultSet res = SqliteDB.getUserDetails(userHash);
                 String salt = "";
                 String actualPass = "";
                 String uid = "";
@@ -165,10 +170,10 @@ public class StartScreen {
                     SqliteDB.closeConnection();
                 }
                 byte[] saltArray = Base64.decodeBase64(salt);
-                String enteredPassword = HashUtil.hashPassword(saltArray, password);
+                String enteredPassword = HashUtil.hash(saltArray, password);
                 // Compares the hash of the entered password with that of the actual password
                 if (enteredPassword.equals(actualPass)) {
-                    currUser = new User(username, uid);
+                    currUser = new User(username, userHash, uid);
                     invalid = false;
                     // If a fingerprint has been set 
                     if (fingerID != 0) {

@@ -1,4 +1,5 @@
 import java.io.Console;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,27 +17,47 @@ public class AccountManager {
         String service = s.nextLine().toLowerCase();
         System.out.print("Enter username: ");
         String username = s.nextLine();
-        if (SqliteDB.checkServiceUsernameExists(service, username)) { // If the account already exists, we don't want to overwrite it 
+        String userEncrypted = AESUtil.encrypt(username, u.getKey());
+        if (checkServiceUsernameExists(service, username, u)) { // If the account already exists, we don't want to overwrite it 
             System.out.println("This account already exists!");
             try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
             return;
         }
        
         String password = getPassword(u);
-        SqliteDB.addAccount(service, username, password); // Adds the account to the database
+        SqliteDB.addAccount(service, userEncrypted, password); // Adds the account to the database
 
         System.out.println("Success, added new " + service + " account with username " + username);
         try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
         return;
     }
 
+    private static boolean checkServiceUsernameExists(String service, String userToCheck, User u) {
+        ResultSet r = SqliteDB.getAccountsFromService(service);
+        try {
+            while (r.next()) {
+                String userChecking = r.getString("username");
+                if (userToCheck.equals(AESUtil.decrypt(userChecking, u.getKey()))) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            SqliteDB.closeConnection();
+        }
+
+        return false;
+
+    }
+
     // To modify an existing account
     public static void modifyAccount(User u) {
         Common.clearTerminal();
         Common.fancyBanner("Modify an existing account");
-        ArrayList<String> selected = selectAccount();
+        ArrayList<String> selected = selectAccount(u);
         if (selected == null) return;
-        System.out.println("You have selected " + selected.get(1) +". What would you like to do?");
+        System.out.println("You have selected " + AESUtil.decrypt(selected.get(1), u.getKey()) +". What would you like to do?");
         System.out.println("1. Change the password");
         System.out.println("2. Delete this account");
         System.out.println("Other. Return to main menu");
@@ -68,11 +89,11 @@ public class AccountManager {
     public static void viewAccount(User u) {
         Common.clearTerminal();
         Common.fancyBanner("View account details");
-        ArrayList<String> selected = selectAccount();
+        ArrayList<String> selected = selectAccount(u);
         if (selected == null) return;
         String encryptedPass = SqliteDB.getAccountPassword(selected.get(0), selected.get(1));
         System.out.println("Service: " + selected.get(0));
-        System.out.println("Username: " + selected.get(1));
+        System.out.println("Username: " + AESUtil.decrypt(selected.get(1), u.getKey()));
         System.out.println("Password: " + AESUtil.decrypt(encryptedPass, u.getKey()));
         System.out.print("\nEnter any character to return to the main menu: ");
         Scanner s = new Scanner(System.in);
@@ -80,7 +101,7 @@ public class AccountManager {
     }
 
     // List of all services and accounts 
-    public static void listAll(){
+    public static void listAll(User u){
         Common.clearTerminal();
         Common.fancyBanner("List of all registered accounts");
         ResultSet res = SqliteDB.allAccountsForUser();
@@ -96,7 +117,7 @@ public class AccountManager {
                     System.out.println(curr_service);
                     prev_service = curr_service;
                 }
-                System.out.println("    " + i + ". " + res.getString("username"));
+                System.out.println("    " + i + ". " + AESUtil.decrypt(res.getString("username"), u.getKey()));
                 i++;
             } while (res.next());
         } catch (SQLException e) {
@@ -159,7 +180,7 @@ public class AccountManager {
     }
 
     // Reusable code to allow a user to select an account 
-    private static ArrayList<String> selectAccount() {
+    private static ArrayList<String> selectAccount(User u) {
         Scanner s = new Scanner(System.in);
         System.out.print("Enter service e.g. Google, Facebook, Openlearning: ");
         String service = s.nextLine().toLowerCase();
@@ -176,7 +197,7 @@ public class AccountManager {
             int i = 0;
             do {
                 String username = r.getString("username");
-                System.out.println(i + ". " + username);
+                System.out.println(i + ". " + AESUtil.decrypt(username, u.getKey()));
                 usernames.add(username);
                 i++;
             } while (r.next());
