@@ -36,4 +36,5 @@ public class HashUtil {
         System.arraycopy(password, 0, combined, username.length, password.length);
         return hashPassword(salt, combined);
     }
+
 }

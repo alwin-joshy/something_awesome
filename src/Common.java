@@ -1,3 +1,7 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 public class Common {
 
         // Erases the terminal
@@ -21,6 +25,34 @@ public class Common {
 
     public static void printDivider() {
         System.out.println("----------------------------------");
+    }
+
+    public static boolean checkPassword(String password) {
+        if (password.length() < 8) {
+            System.out.println("Password is too short. Please enter a longer password (at least 8 characters)"); 
+            return false;
+        }
+
+        File f = new File("passwords.txt");
+
+        try {
+            Scanner sc = new Scanner(f);
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                line.strip();
+                if (line.equals(password)) {
+                    System.out.println("Password is too common. Please enter a different password");
+                    sc.close();
+                    return false;
+                }
+            }
+            sc.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return false; 
+        } 
+
+        return true;
     }
     
 }

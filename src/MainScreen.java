@@ -1,4 +1,6 @@
 import java.io.Console;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -151,7 +153,6 @@ public class MainScreen {
 
         System.out.println("Sucessfully added device!");
         try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
-
 
     }
 

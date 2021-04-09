@@ -137,6 +137,13 @@ public class AccountManager {
                     Console c =  System.console();
                     System.out.print("Enter password: ");
                     password = new String(c.readPassword());
+                    if (!Common.checkPassword(password)) {
+                        System.out.println("It is recommended that you use a stronger passsword. Would you like to procceed anyway? Press enter to use this password and any other button to re-enter a different password");
+                        String check = s.nextLine();
+                        if (!check.equals("")) {
+                            continue;
+                        }
+                    }
                     System.out.print("Confirm password: ");
                     String password2 = new String(c.readPassword());
                     if (password.equals(password2)) {

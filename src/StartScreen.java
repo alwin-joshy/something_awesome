@@ -1,4 +1,6 @@
 import java.io.Console;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -71,7 +73,10 @@ public class StartScreen {
 
             System.out.print("Enter password: ");
             char[] passwordArray = c.readPassword();
-            password = passwordArray.toString();
+            password = new String(passwordArray);
+            if (!Common.checkPassword(password)) {
+                continue;
+            }
             hash1String = HashUtil.hashPassword(salt, passwordArray);
 
             System.out.print("Confirm password: ");
@@ -81,7 +86,6 @@ public class StartScreen {
                 System.out.println("Passwords don't match! Try again");
             } else {
                 done = true;
-
             }
         }
 
@@ -205,4 +209,5 @@ public class StartScreen {
 
         return false; 
     }
+
 }

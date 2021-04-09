@@ -156,12 +156,12 @@ public class StringGenerator {
         int length;
         Scanner s = new Scanner(System.in);
         while (true) {
-            System.out.print("Enter desired length (5-128): ");
+            System.out.print("Enter desired length (8-128): ");
             length = s.nextInt();
-            if (length >= 5 && length <= 128) {
+            if (length >= 8 && length <= 128) {
                 break;
             }
-            System.out.println("Desired length must be between 5 and 128 characters long");
+            System.out.println("Desired length must be between 8 and 128 characters long");
         }
         return length;
     }
