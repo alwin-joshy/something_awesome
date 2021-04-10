@@ -46,9 +46,10 @@ public class HashUtil {
     }
 
     // Generates the user's encrytpion key of their username + password
-    public static String generateEncryptionKey(char[] username, char[] password, byte[] salt) {
-        char[] combined = Arrays.copyOf(username, username.length + password.length);
+    public static String generateEncryptionKey(char[] username, char[] password, char[] serial, byte[] salt) {
+        char[] combined = Arrays.copyOf(username, username.length + password.length + serial.length);
         System.arraycopy(password, 0, combined, username.length, password.length);
+        System.arraycopy(serial, 0, combined, username.length + password.length, serial.length);
         return hash(salt, combined);
     }
 

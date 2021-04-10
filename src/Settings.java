@@ -60,13 +60,16 @@ public class Settings {
         try {
             ResultSet r = SqliteDB.getUserDetails(u.getUsername());
             serial = r.getString("serial");
-            salt = r.getString("salt");
+            passwordHash = r.getString("password")
+            oldSalt = r.getString("salt");
         } catch (SQLException e) {
             e.printStackTrace();
             return;
         } finally {
             SqliteDB.closeConnection();
         }
+
+        byte[] oldSaltArray = Base64.decodeBase64(oldSalt);
 
         // If there is already a connected device
         if (!serial.equals("")) {
@@ -79,13 +82,36 @@ public class Settings {
             }
         }
 
+        Console c = System.console();
+        System.out.print("Enter password to confirm: ");
+        char[] pass = c.readPassword();
+
+        if (!passwordHash.equals(HashUtil.hash(oldSaltArray, pass))) {
+            System.out.println("Incorrect password. Returning to menu screen")
+            try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
+            return;
+        }
+
         serial = ArduinoUtil.addArduino();
         if (serial.equals("")) {
             return;
         }
 
-        String serialHash = HashUtil.hash(Base64.decodeBase64(salt), serial.toCharArray());
-        SqliteDB.updateSerial(serialHash);
+        byte[] newSalt = HashUtil.saltGen();
+        String newSerialHash = HashUtil.hash(newSalt, serial.toCharArray());
+        String newPassHash = HashUtil.hash(newSalt, pass);
+
+        String newKey =  HashUtil.generateEncryptionKey(u.getUsername().toCharArray(), pass, serial.toCharArray(), newSalt);
+        try {
+            reEncryptPasswords(u.getKey(), newKey);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(0);
+        } finally {
+            SqliteDB.closeConnection();
+        }
+        u.setKey(newKey);
+        SqliteDB.updateMasterPasswordSerial(newPassHash, newSerialHash, Base64.encodeBase64String(newSalt));
 
         System.out.println("Sucessfully added device!");
         try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
@@ -187,7 +213,7 @@ public class Settings {
                 if (newPass.equals(HashUtil.hash(newSalt, c.readPassword()))) break;
                 System.out.println("Passwords don't match. Please try again");
             }
-            String newKey =  HashUtil.generateEncryptionKey(u.getUsername().toCharArray(), newPassArray, newSalt);
+            String newKey =  HashUtil.generateEncryptionKey(u.getUsername().toCharArray(), newPassArray, serial.toCharArray(), newSalt);
             try {
                 reEncryptPasswords(u.getKey(), newKey);
             } catch (SQLException e) {

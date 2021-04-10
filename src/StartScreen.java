@@ -129,7 +129,7 @@ public class StartScreen {
         System.out.println("Account creation successful!");
         currUser = new User(username, usernameHash, uid);
         // Generates and sets encryption key 
-        String key = HashUtil.generateEncryptionKey(username.toCharArray(), password.toCharArray(), salt);
+        String key = HashUtil.generateEncryptionKey(username.toCharArray(), password.toCharArray(), serial.toCharArray(), salt);
         currUser.setKey(key);
         Thread.sleep(1000);
         return true; 
@@ -156,13 +156,13 @@ public class StartScreen {
                 String salt = "";
                 String actualPass = "";
                 String uid = "";
-                String serial = ""; 
+                String serialHash = ""; 
                 int fingerID = 0;
                 try {
                     salt = res.getString("salt");
                     actualPass = res.getString("password");
                     uid = res.getString("rowid");
-                    serial = res.getString("serial");
+                    serialHash = res.getString("serial");
                     fingerID = res.getInt("f1");
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -187,15 +187,17 @@ public class StartScreen {
                             Thread.sleep(2000);
                             return false;
                         }
-                    } else if (!serial.equals("")) { // If unique arduino authentication has been set
-                        if (ArduinoUtil.checkArduinoConnection(serial, saltArray) == null) {
+                    } else if (!serialHash.equals("")) { // If unique arduino authentication has been set
+                        SerialPort p  = ArduinoUtil.checkArduinoConnection(serialHash, saltArray)
+                        if (p == null) {
                             return false;
                         }
+                        String serial = ArduinoUtil.getSerialNumber(p);
                     }
 
                     System.out.println("\nLogin successful!");
                     // Generates and sets encryption key 
-                    String key = HashUtil.generateEncryptionKey(username.toCharArray(), password, saltArray); 
+                    String key = HashUtil.generateEncryptionKey(username.toCharArray(), password, serial.toCharArray(), saltArray); 
                     currUser.setKey(key);
                     Thread.sleep(1000);
 
