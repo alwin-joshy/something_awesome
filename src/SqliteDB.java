@@ -206,14 +206,15 @@ public class SqliteDB {
     }
 
     // Updates the master password and salt for the password manager 
-    public static void updateMasterPassword(String newPass, String newSalt) {
+    public static void updateMasterPasswordSerial(String newPass, String newSerial, String newSalt) {
         try {
             getConnection();
-            String q = "UPDATE login SET password=?, salt=? WHERE rowid=?";
+            String q = "UPDATE login SET password=?, salt=?, serial=? WHERE rowid=?";
             PreparedStatement prep = c.prepareStatement(q);
             prep.setString(1, newPass);
             prep.setString(2, newSalt);
-            prep.setInt(3, Integer.parseInt(uid));
+            prep.setString(3, newSerial);
+            prep.setInt(4, Integer.parseInt(uid));
             prep.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

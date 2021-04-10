@@ -48,8 +48,8 @@ public class ArduinoUtil {
     }
 
     // Checks if a fingerprint matches one on the fingerprint scanner and returns the fingerprint ID if it is, 0 if it is not, or -1 if encounters an error 
-    public static int getFingerprint(String authenticSerial, byte[] salt) {
-        SerialPort p = checkArduinoConnection(authenticSerial, salt);
+    public static int getFingerprint(String authenticSerialHash, byte[] salt) {
+        SerialPort p = checkArduinoConnection(authenticSerialHash, salt);
         if (p == null) {
             return -1;
         }
@@ -154,8 +154,8 @@ public class ArduinoUtil {
     }
 
     // Registers a new fingerprint to the fingerprint database and returns the ID it is assigned 
-    public static int addFingerprint(String authenticSerial, byte[] salt) throws IOException {
-        SerialPort p = checkArduinoConnection(authenticSerial, salt);
+    public static int addFingerprint(String authenticSerialHash, byte[] salt) throws IOException {
+        SerialPort p = checkArduinoConnection(authenticSerialHash, salt);
         if (p == null) {
             return 0;
         }
@@ -352,7 +352,7 @@ public class ArduinoUtil {
         return serial;
     }
     // Checks to see if linked arduino is connected to the PC
-    public static SerialPort checkArduinoConnection(String authenticSerial, byte[] salt) {
+    public static SerialPort checkArduinoConnection(String authenticSerialHash, byte[] salt) {
         System.out.println("\nPlease connect the arduino associated with this account.");
         System.out.println("Press any key when you have connected it");
         Scanner s = new Scanner(System.in);
@@ -362,7 +362,7 @@ public class ArduinoUtil {
         SerialPort port = null;
         SerialPort ports[] = SerialPort.getCommPorts();
         for (int i = 1; i < ports.length; i++) {
-            if (HashUtil.hash(salt, getSerialNumber(ports[i]).toCharArray()).equals(authenticSerial)) {
+            if (HashUtil.hash(salt, getSerialNumber(ports[i]).toCharArray()).equals(authenticSerialHash)) {
                 port = ports[i];
                 break;
             }
