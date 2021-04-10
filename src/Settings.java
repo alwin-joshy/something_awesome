@@ -141,14 +141,12 @@ public class Settings {
         Common.fancyBanner("Change master password");
         String oldPass = "";
         String oldSalt = "";
-
-        ArduinoUtil.
     
         try {
             ResultSet res = SqliteDB.getUserDetails(u.getUsernameHash());
             oldPass = res.getString("password");
             oldSalt = res.getString("salt");
-            oldSerialHash = res.getStrng("serial");
+            oldSerialHash = res.getString("serial");
         } catch (SQLException e){
             e.printStackTrace();
             System.exit(0);
@@ -159,7 +157,7 @@ public class Settings {
         byte[] oldSaltArray = Base64.decodeBase64(oldSalt);
 
         if (!oldSerialHash.equals("")) {
-            SerialPort p = rduinoUtil.checkConnection(oldSerialHash, oldSaltArray)
+            SerialPort p = ArduinoUtil.checkConnection(oldSerialHash, oldSaltArray)
             if (p == null) {
                 System.out.println("Please connect the Arduino associated with this account and try again.")
                 try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
@@ -199,7 +197,10 @@ public class Settings {
                 SqliteDB.closeConnection();
             }
             u.setKey(newKey);
-            String newSerial = HashUtil.hash(newSalt, serial.toCharArray());
+            String newSerial = "";
+            if (!oldSerialHash.equals("")) {
+                newSerial = HashUtil.hash(newSalt, serial.toCharArray());
+            }
             SqliteDB.updateMasterPasswordSerial(newPass, newSerial, Base64.encodeBase64String(newSalt));
             System.out.println("Password changed successfully!");
         } else {
