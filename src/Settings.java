@@ -181,13 +181,19 @@ public class Settings {
         }
 
         byte[] oldSaltArray = Base64.decodeBase64(oldSalt);
+        Scanner s = new Scanner(System.in);
 
         if (!oldSerialHash.equals("")) {
             SerialPort p = ArduinoUtil.checkConnection(oldSerialHash, oldSaltArray)
             if (p == null) {
-                System.out.println("Please connect the Arduino associated with this account and try again.")
-                try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
-                return;
+                System.out.print("Associated arduino not detected. Please connect and enter any key: ");
+                String command = s.nextLine();
+                p = ArduinoUtil.checkConnection(oldSerialHash, oldSaltArray);
+                if (p == null) {
+                    System.out.print("Could not find the associated Arduino. Returning to main menu... ");
+                    try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
+                    return;
+                }
             }
             String serial = ArduinoUtil.getSerialNumber(p);
             if (serial == null) {
