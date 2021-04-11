@@ -62,7 +62,7 @@ public class SqliteDB {
     public static ResultSet allAccountsForUser() {
         try {
             getConnection();
-            String q = "SELECT service, username from user" + uid + "_data ORDER BY service ASC;";
+            String q = "SELECT service, username, password from user" + uid + "_data ORDER BY service ASC;";
             Statement s = c.createStatement();
             return s.executeQuery(q);
         } catch (SQLException e) {
@@ -103,6 +103,24 @@ public class SqliteDB {
         } finally {
             closeConnection();
         }
+        return 0;
+    }
+
+    public static int updateUsername(String service, String pass, String newUser) {
+        try {
+            getConnection();
+            String q = "UPDATE user" + uid + "_data SET username=? WHERE service=? AND password=?";
+            PreparedStatement prep = c.prepareStatement(q);
+            prep.setString(1, newUser);
+            prep.setString(2, service);
+            prep.setString(3, pass);
+            return prep.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        } 
+
         return 0;
     }
 
@@ -396,6 +414,8 @@ public class SqliteDB {
             }
         }
     }
+
+
 
 
 }

@@ -339,7 +339,7 @@ public class ArduinoUtil {
     }
 
     // Runs a shell script which gets the serial number of the connected device 
-    private static String getSerialNumber(SerialPort port) {
+    public static String getSerialNumber(SerialPort port) {
         String serial = null;
         try {
             Process p = Runtime.getRuntime().exec("bash getSerial.sh " + port.getSystemPortName());

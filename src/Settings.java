@@ -7,6 +7,8 @@ import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetFactory;
 import javax.sql.rowset.RowSetProvider;
 
+import com.fazecast.jSerialComm.SerialPort;
+
 import org.apache.commons.codec.binary.Base64;
 
 public class Settings {
@@ -56,11 +58,12 @@ public class Settings {
 
     private static void addArduino(User u) {
         String serial = "";
-        String salt = "";
+        String passwordHash = "";
+        String oldSalt = "";
         try {
-            ResultSet r = SqliteDB.getUserDetails(u.getUsername());
+            ResultSet r = SqliteDB.getUserDetails(u.getUsernameHash());
             serial = r.getString("serial");
-            passwordHash = r.getString("password")
+            passwordHash = r.getString("password");
             oldSalt = r.getString("salt");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -87,7 +90,7 @@ public class Settings {
         char[] pass = c.readPassword();
 
         if (!passwordHash.equals(HashUtil.hash(oldSaltArray, pass))) {
-            System.out.println("Incorrect password. Returning to menu screen")
+            System.out.println("Incorrect password. Returning to menu screen");
             try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
             return;
         }
@@ -103,7 +106,7 @@ public class Settings {
 
         String newKey =  HashUtil.generateEncryptionKey(u.getUsername().toCharArray(), pass, serial.toCharArray(), newSalt);
         try {
-            reEncryptPasswords(u.getKey(), newKey);
+            reEncryptAccounts(u.getKey(), newKey);
         } catch (SQLException e) {
             e.printStackTrace();
             System.exit(0);
@@ -121,7 +124,7 @@ public class Settings {
     private static void addFingerPrint(User u) {
 
         try {
-            ResultSet r = SqliteDB.getUserDetails(u.getUsername());
+            ResultSet r = SqliteDB.getUserDetails(u.getUsernameHash());
             String serial = r.getString("serial");
             String salt = r.getString("salt");
             if (serial == null) {
@@ -167,6 +170,7 @@ public class Settings {
         Common.fancyBanner("Change master password");
         String oldPass = "";
         String oldSalt = "";
+        String oldSerialHash = "";
     
         try {
             ResultSet res = SqliteDB.getUserDetails(u.getUsernameHash());
@@ -182,20 +186,21 @@ public class Settings {
 
         byte[] oldSaltArray = Base64.decodeBase64(oldSalt);
         Scanner s = new Scanner(System.in);
+        String serial = "";
 
         if (!oldSerialHash.equals("")) {
-            SerialPort p = ArduinoUtil.checkConnection(oldSerialHash, oldSaltArray)
+            SerialPort p = ArduinoUtil.checkArduinoConnection(oldSerialHash, oldSaltArray);
             if (p == null) {
                 System.out.print("Associated arduino not detected. Please connect and enter any key: ");
                 String command = s.nextLine();
-                p = ArduinoUtil.checkConnection(oldSerialHash, oldSaltArray);
+                p = ArduinoUtil.checkArduinoConnection(oldSerialHash, oldSaltArray);
                 if (p == null) {
                     System.out.print("Could not find the associated Arduino. Returning to main menu... ");
                     try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
                     return;
                 }
             }
-            String serial = ArduinoUtil.getSerialNumber(p);
+            serial = ArduinoUtil.getSerialNumber(p);
             if (serial == null) {
                 System.out.println("Unable to read device serial");
                 try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
@@ -221,7 +226,7 @@ public class Settings {
             }
             String newKey =  HashUtil.generateEncryptionKey(u.getUsername().toCharArray(), newPassArray, serial.toCharArray(), newSalt);
             try {
-                reEncryptPasswords(u.getKey(), newKey);
+                reEncryptAccounts(u.getKey(), newKey);
             } catch (SQLException e) {
                 e.printStackTrace();
                 System.exit(0);
@@ -243,7 +248,7 @@ public class Settings {
         
     }
     
-    private static void reEncryptPasswords(String oldKey, String newKey) throws SQLException {
+    private static void reEncryptAccounts(String oldKey, String newKey) throws SQLException {
         RowSetFactory f = RowSetProvider.newFactory();
         CachedRowSet r = f.createCachedRowSet(); // Found this here https://stackoverflow.com/questions/25493837/java-cant-use-resultset-after-connection-close
         r.populate(SqliteDB.allAccountsForUser());
@@ -251,10 +256,13 @@ public class Settings {
         while (r.next()) {
             String s = r.getString("service");
             String u = r.getString("username");
-            String pass = SqliteDB.getAccountPassword(s, u);
-            String unencryptedPass = AESUtil.decrypt(pass, oldKey);
-            String encryptedPass = AESUtil.encrypt(unencryptedPass, newKey);
-            SqliteDB.updatePassword(s, u, encryptedPass);
+            String p = r.getString("password");
+            String decryptedUser = AESUtil.decrypt(u, oldKey);
+            String encryptedUser = AESUtil.encrypt(decryptedUser, newKey);
+            SqliteDB.updateUsername(s, p, encryptedUser);
+            String decryptedPass = AESUtil.decrypt(p, oldKey);
+            String encryptedPass = AESUtil.encrypt(decryptedPass, newKey);
+            SqliteDB.updatePassword(s, encryptedUser, encryptedPass);
         }
     }
     

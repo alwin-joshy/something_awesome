@@ -6,6 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
+
+import com.fazecast.jSerialComm.SerialPort;
+
 import org.apache.commons.codec.binary.Base64;
 
 public class StartScreen {
@@ -171,13 +174,14 @@ public class StartScreen {
                 }
                 byte[] saltArray = Base64.decodeBase64(salt);
                 String enteredPassword = HashUtil.hash(saltArray, password);
+                String serial = "";
                 // Compares the hash of the entered password with that of the actual password
                 if (enteredPassword.equals(actualPass)) {
                     currUser = new User(username, userHash, uid);
                     invalid = false;
                     // If a fingerprint has been set 
                     if (fingerID != 0) {
-                        fingerID = ArduinoUtil.getFingerprint(serial, saltArray);
+                        fingerID = ArduinoUtil.getFingerprint(serialHash, saltArray);
                         if (fingerID == - 1 || fingerID == 0) {
                             Thread.sleep(2000);
                             return false;
@@ -188,11 +192,11 @@ public class StartScreen {
                             return false;
                         }
                     } else if (!serialHash.equals("")) { // If unique arduino authentication has been set
-                        SerialPort p  = ArduinoUtil.checkArduinoConnection(serialHash, saltArray)
+                        SerialPort p  = ArduinoUtil.checkArduinoConnection(serialHash, saltArray);
                         if (p == null) {
                             return false;
                         }
-                        String serial = ArduinoUtil.getSerialNumber(p);
+                        serial = ArduinoUtil.getSerialNumber(p);
                     }
 
                     System.out.println("\nLogin successful!");
