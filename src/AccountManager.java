@@ -105,7 +105,11 @@ public class AccountManager {
         Common.fancyBanner("List of all registered accounts");
         ResultSet res = SqliteDB.allAccountsForUser();
         try {
-            res.next();
+            if (!res.next()) {
+                System.out.println("No accounts have been added yet. Add an account and come back!");
+                try {Thread.sleep(2000);} catch (InterruptedException e) {e.printStackTrace();}
+                return;
+            }
             String prev_service = null;
             String curr_service;
             int i = 1;

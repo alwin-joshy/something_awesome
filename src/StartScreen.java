@@ -186,7 +186,7 @@ public class StartScreen {
                             Thread.sleep(2000);
                             return false;
                         }
-                        if (!SqliteDB.checkPrints(username, fingerID)) {
+                        if (!SqliteDB.checkPrints(userHash, fingerID)) {
                             System.out.println("Fingerprint does not match any registered fingerprints. Returning to main menu");
                             Thread.sleep(2000);
                             return false;

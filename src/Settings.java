@@ -15,6 +15,8 @@ public class Settings {
 
     // Settings screen 
     public static void showSettings(User u){
+        Common.clearTerminal();
+        Common.fancyBanner("Settings");
         System.out.println("Enter g to set the default configuration for the random password generator");
         System.out.println("Enter x to erase all records. This cannot be undone.");
         System.out.println("Enter p to change master password");
@@ -56,6 +58,7 @@ public class Settings {
         }
     }
 
+    // To add an arduino or change the device connected to the account
     private static void addArduino(User u) {
         String serial = "";
         String passwordHash = "";
@@ -121,6 +124,7 @@ public class Settings {
 
     }
 
+    // To add a new fingerprint 
     private static void addFingerPrint(User u) {
 
         try {
@@ -165,6 +169,7 @@ public class Settings {
                             "q - logout");
     }
 
+    // To change a user's password
     private static void changePassword(User u) {
         Common.clearTerminal();
         Common.fancyBanner("Change master password");
@@ -188,6 +193,7 @@ public class Settings {
         Scanner s = new Scanner(System.in);
         String serial = "";
 
+        // Gets the serial number of the Arduino which is associated with the account 
         if (!oldSerialHash.equals("")) {
             SerialPort p = ArduinoUtil.checkArduinoConnection(oldSerialHash, oldSaltArray);
             if (p == null) {
@@ -208,7 +214,7 @@ public class Settings {
             }
         }
 
-        
+        // Confirming old pass and getting new password 
         Console c = System.console();
         System.out.print("Enter old password: ");
         if (oldPass.equals(HashUtil.hash(oldSaltArray, c.readPassword()))) {
@@ -224,6 +230,8 @@ public class Settings {
                 if (newPass.equals(HashUtil.hash(newSalt, c.readPassword()))) break;
                 System.out.println("Passwords don't match. Please try again");
             }
+
+            // Updating the key, re-encrypting accounts, and changing the login details
             String newKey =  HashUtil.generateEncryptionKey(u.getUsername().toCharArray(), newPassArray, serial.toCharArray(), newSalt);
             try {
                 reEncryptAccounts(u.getKey(), newKey);
@@ -248,6 +256,8 @@ public class Settings {
         
     }
     
+    // When the password or serial is changed, you have to re-encrypt all the accounts with the new credentials or 
+    // they will be inaccessible
     private static void reEncryptAccounts(String oldKey, String newKey) throws SQLException {
         RowSetFactory f = RowSetProvider.newFactory();
         CachedRowSet r = f.createCachedRowSet(); // Found this here https://stackoverflow.com/questions/25493837/java-cant-use-resultset-after-connection-close
