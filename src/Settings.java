@@ -107,6 +107,7 @@ public class Settings {
         String newSerialHash = HashUtil.hash(newSalt, serial.toCharArray());
         String newPassHash = HashUtil.hash(newSalt, pass);
 
+        // Sets the new keys and re-encrypts the database 
         String newKey =  HashUtil.generateEncryptionKey(u.getUsername().toCharArray(), pass, serial.toCharArray(), newSalt);
         try {
             reEncryptAccounts(u.getKey(), newKey);

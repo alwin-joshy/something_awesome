@@ -14,7 +14,7 @@ import org.apache.commons.codec.binary.Base64;
 public class StartScreen {
     private User currUser;
 
-    public User startup() throws IOException, InterruptedException {
+    public User startup() throws InterruptedException {
         // Show initial options         
         Scanner s = new Scanner(System.in);
 
@@ -44,7 +44,8 @@ public class StartScreen {
         return currUser;
     } 
 
-    private boolean createUser() throws IOException, InterruptedException {
+    // To make a new account 
+    private boolean createUser() throws InterruptedException {
         Common.clearTerminal();
         Common.fancyBanner("Create a new account");
         Scanner s = new Scanner(System.in);
@@ -68,7 +69,6 @@ public class StartScreen {
         // https://stackoverflow.com/questions/8138411/masking-password-input-from-the-console-java
         // Generating the salt
         
-       
 
         done = false; 
         Console c =  System.console();
@@ -81,6 +81,7 @@ public class StartScreen {
             System.out.print("Enter password: ");
             char[] passwordArray = c.readPassword();
             password = new String(passwordArray);
+            // THis is basically to make sure that the password is not too common. Commented out for ease of use
             // if (!Common.checkPassword(password)) {
             //     continue;
             // }
@@ -141,7 +142,7 @@ public class StartScreen {
 
    
     // Allows user to log in 
-    private boolean login() throws IOException, InterruptedException {
+    private boolean login() throws InterruptedException {
         Common.clearTerminal();
         Scanner s = new Scanner(System.in);
         Console c =  System.console();

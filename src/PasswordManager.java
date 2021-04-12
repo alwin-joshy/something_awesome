@@ -1,9 +1,3 @@
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-
-import org.json.simple.parser.ParseException;
-
 public class PasswordManager {
     private User currUser;
     private StartScreen ss;
@@ -16,7 +10,7 @@ public class PasswordManager {
     }
 
     // Main function 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws InterruptedException {
         PasswordManager pm = new PasswordManager();
         while (true) {
             pm.startup();
@@ -31,7 +25,7 @@ public class PasswordManager {
     }
 
     // Start screen 
-    public void startup() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ParseException, InterruptedException {
+    public void startup() throws InterruptedException {
         currUser = ss.startup();
     }
 

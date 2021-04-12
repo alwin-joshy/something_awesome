@@ -106,6 +106,7 @@ public class SqliteDB {
         return 0;
     }
 
+    // Updating username based on password
     public static int updateUsername(String service, String pass, String newUser) {
         try {
             getConnection();
