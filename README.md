@@ -6,7 +6,7 @@ Welcome to the Awesome Password Manager. This application allows you to securely
 
 All the required libraries are included in the lib directory. 
 Arduino-cli is also required for any arduino-based authentication in this program to work. 
-This program was developed for Linux and will not work on Windows or OSX
+This program was developed for Linux and will not work on Windows or OSX.
 Only Arduino UNO R3 has been tested for compatability, but other chips which have a serial number should work. 
 The fingerprint sensor used is the is the Adafruit fingerprint sensor. 
 
